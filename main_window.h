@@ -47,8 +47,8 @@ class MainWindow: public QMainWindow {
 	private:
 	QPixmap* image;
     ToolBar* toolbar;
-    QColor foregroundColor;
-    QColor backgroundColor;
+    QColor foregroundColor = Qt::white;
+    QColor backgroundColor = Qt::white;
 };
 
 #endif

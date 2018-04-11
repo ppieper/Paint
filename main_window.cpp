@@ -42,7 +42,7 @@ void MainWindow::paintEvent(QPaintEvent* e)
 	QPainter paint(this);
 	if (! image->isNull())
 	{
-        paint.drawPixmap(0, menuBar()->height() + TOOLBAR_HEIGHT, (*image));
+        paint.drawPixmap(1, menuBar()->height() + TOOLBAR_HEIGHT, (*image));
 	}
 }
 
@@ -61,7 +61,7 @@ void MainWindow::OnNewImage()
         int width = newCanvas->getWidthValue();
         int height = newCanvas->getHeightValue();
         image = new QPixmap(QSize(width,height));
-        image->fill(Qt::white);
+        image->fill(backgroundColor);
         this->repaint();
     }
     // done with the dialog, free it
