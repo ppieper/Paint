@@ -2,11 +2,9 @@
 using namespace std;
 
 #include "main_window.h"
-#include "dialog_windows.h"
+#include "commands.h"
 
 const int TOOLBAR_HEIGHT = 39;
-const int BACKGROUND = 1;
-const int FOREGROUND = 0;
 
 /**
  * @brief MainWindow::MainWindow - the main window, parent to every other widget.
@@ -14,6 +12,8 @@ const int FOREGROUND = 0;
 MainWindow::MainWindow(QWidget* parent, const char* name)
     :QMainWindow(parent)
 {
+    undoStack = new QUndoStack(this);
+
     // create menu items
     QMenu* file = new QMenu("File", this);
     file->addAction("New image...", this, SLOT(OnNewImage()));
@@ -57,12 +57,17 @@ void MainWindow::OnNewImage()
     // if user hit 'OK' button, create new image
     if (newCanvas->result())
     {
-        delete image;
+        // save a copy of the old image
+        QPixmap old_image = image->copy(QRect());
+
         int width = newCanvas->getWidthValue();
         int height = newCanvas->getHeightValue();
-        image = new QPixmap(QSize(width,height));
+        *image = QPixmap(QSize(width,height));
         image->fill(backgroundColor);
         this->repaint();
+
+        // for undo/redo
+        saveCommand(old_image);
     }
     // done with the dialog, free it
     delete newCanvas;
@@ -79,7 +84,13 @@ void MainWindow::OnLoadImage()
                                                     tr("BMP image (*.bmp)"));
 	if (! s.isNull())
 	{
+        // save a copy of the old image
+        QPixmap old_image = image->copy(QRect());
+
 		image->load(s);
+
+        // for undo/redo
+        saveCommand(old_image);
 	}
 
     this->repaint();
@@ -108,7 +119,13 @@ void MainWindow::OnSaveImage()
 
         if (! s.isNull())
         {
+            // save a copy of the old image
+            QPixmap old_image = image->copy(QRect());
+
             image->save(s, "BMP");
+
+            // for undo/redo
+            saveCommand(old_image);
         }
     }
     // done with the dialog, free it
@@ -121,7 +138,11 @@ void MainWindow::OnSaveImage()
  */
 void MainWindow::OnUndo()
 {
-    //stub
+    if(!undoStack->canUndo())
+        return;
+
+    undoStack->undo();
+    this->repaint();
 }
 
 /**
@@ -130,7 +151,11 @@ void MainWindow::OnUndo()
  */
 void MainWindow::OnRedo()
 {
-    //stub
+    if(!undoStack->canRedo())
+        return;
+
+    undoStack->redo();
+    this->repaint();
 }
 
 /**
@@ -142,8 +167,14 @@ void MainWindow::OnClearAll()
     if(image->isNull())
         return;
 
+    // save a copy of the old image
+    QPixmap old_image = image->copy(QRect());
+
     image->fill(); // default is white
     this->repaint();
+
+    // for undo/redo
+    saveCommand(old_image);
 }
 
 /**
@@ -161,10 +192,17 @@ void MainWindow::OnResizeImage()
     // if user hit 'OK' button, create new image
     if (newCanvas->result())
     {
+        // save a copy of the old image
+        QPixmap old_image = image->copy(QRect());
+
+        // re-scale the image
         int width = newCanvas->getWidthValue();
         int height = newCanvas->getHeightValue();
         *image = image->scaled(QSize(width,height), Qt::IgnoreAspectRatio);
         this->repaint();
+
+        // for undo/redo
+        saveCommand(old_image);
     }
     // done with the dialog, free it
     delete newCanvas;
@@ -177,17 +215,17 @@ void MainWindow::OnResizeImage()
 void MainWindow::OnPickColor(int which)
 {
     QColorDialog* colorDialog = new QColorDialog(this);
-    QColor aColor = colorDialog->getColor(which == FOREGROUND ? foregroundColor
+    QColor aColor = colorDialog->getColor(which == foreground ? foregroundColor
                                                               : backgroundColor,
                                           this,
-                                          which == FOREGROUND ? "Foreground Color"
+                                          which == foreground ? "Foreground Color"
                                                               : "Background Color",
                                           QColorDialog::DontUseNativeDialog);
 
     // if user hit 'OK' button, change the color
     if (aColor.isValid())
     {
-       if(which == FOREGROUND)
+       if(which == foreground)
            foregroundColor = aColor;
        else
            backgroundColor = aColor;
@@ -199,6 +237,18 @@ void MainWindow::OnPickColor(int which)
 void MainWindow::mousePressEvent(QMouseEvent * e)
 {
     //paintEvent(new QPaintEvent(QRect(0,0,640,480)));
+}
+
+/**
+ * @brief MainWindow::SaveCommand - Put together a DrawCommand
+ *                                  and save it on the undo/redo stack.
+ *
+ */
+void MainWindow::saveCommand(QPixmap old_image)
+{
+    // put the old and new image on the stack for undo/redo
+    QUndoCommand *drawCommand = new DrawCommand(old_image, image);
+    undoStack->push(drawCommand);
 }
 
 /**
@@ -273,8 +323,8 @@ void ToolBar::createActions()
     bcolor_action->setShortcut(tr("Ctrl+B"));
     connect(bcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
 
-    signalMapper->setMapping(fcolor_action, FOREGROUND);
-    signalMapper->setMapping(bcolor_action, BACKGROUND);
+    signalMapper->setMapping(fcolor_action, foreground);
+    signalMapper->setMapping(bcolor_action, background);
 
     connect(signalMapper, SIGNAL(mapped(int)), mainWindow, SLOT(OnPickColor(int)));
 

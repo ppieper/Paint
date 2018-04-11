@@ -3,6 +3,8 @@
 #include <QGraphicsView>
 #include <QGraphicsItem>
 
+#include "dialog_windows.h"
+
 #ifndef _MAIN_WINDOW_H
 #define _MAIN_WINDOW_H
 
@@ -45,6 +47,9 @@ class MainWindow: public QMainWindow {
     void OnPickColor(int);
 
 	private:
+    void saveCommand(QPixmap);
+
+    QUndoStack* undoStack;
 	QPixmap* image;
     ToolBar* toolbar;
     QColor foregroundColor = Qt::white;
