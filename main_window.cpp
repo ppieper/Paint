@@ -179,7 +179,10 @@ void MainWindow::OnPickColor(int which)
     QColorDialog* colorDialog = new QColorDialog(this);
     QColor aColor = colorDialog->getColor(which == FOREGROUND ? foregroundColor
                                                               : backgroundColor,
-                                          this,"Foreground Color", QColorDialog::DontUseNativeDialog);
+                                          this,
+                                          which == FOREGROUND ? "Foreground Color"
+                                                              : "Background Color",
+                                          QColorDialog::DontUseNativeDialog);
 
     // if user hit 'OK' button, change the color
     if (aColor.isValid())
@@ -233,32 +236,41 @@ void ToolBar::createActions()
 
     // create the actions for each button
     QAction *new_action = new QAction(new_icon, "New File", this);
+    new_action->setShortcut(tr("Ctrl+N"));
     connect(new_action, &QAction::triggered, mainWindow, &MainWindow::OnNewImage);
 
     QAction *open_action = new QAction(open_icon, "Open File", this);
+    open_action->setShortcut(tr("Ctrl+O"));
     connect(open_action, &QAction::triggered, mainWindow, &MainWindow::OnLoadImage);
 
     QAction *save_action = new QAction(save_icon, "Save File", this);
+    save_action->setShortcut(tr("Ctrl+S"));
     connect(save_action, &QAction::triggered, mainWindow, &MainWindow::OnSaveImage);
 
     QAction *clear_action = new QAction(clear_icon, "Clear", this);
+    clear_action->setShortcut(tr("Ctrl+C"));
     connect(clear_action, &QAction::triggered, mainWindow, &MainWindow::OnClearAll);
 
     QAction *resize_action = new QAction(resize_icon, "Resize", this);
+    resize_action->setShortcut(tr("Ctrl+R"));
     connect(resize_action, &QAction::triggered, mainWindow, &MainWindow::OnResizeImage);
 
     QAction *undo_action = new QAction(undo_icon, "Undo", this);
+    undo_action->setShortcut(tr("Ctrl+Z"));
     connect(undo_action, &QAction::triggered, mainWindow, &MainWindow::OnUndo);
 
     QAction *redo_action = new QAction(redo_icon, "Redo", this);
+    redo_action->setShortcut(tr("Ctrl+Y"));
     connect(redo_action, &QAction::triggered, mainWindow, &MainWindow::OnRedo);
 
     // color pickers
     QSignalMapper *signalMapper = new QSignalMapper(this);
 
     QAction *fcolor_action = new QAction(fcolor_icon, "Foreground Color", this);
+    fcolor_action->setShortcut(tr("Ctrl+F"));
     connect(fcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
     QAction *bcolor_action = new QAction(bcolor_icon, "Background Color", this);
+    bcolor_action->setShortcut(tr("Ctrl+B"));
     connect(bcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
 
     signalMapper->setMapping(fcolor_action, FOREGROUND);
