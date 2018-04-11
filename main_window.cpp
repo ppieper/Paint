@@ -356,3 +356,49 @@ int CanvasSizeDialog::getHeightValue() const
     return heightSpinBox->value();
 }
 
+/**
+ * @brief LineDialog::LineSizeDialog - Dialogue selecting what kind of line to draw.
+ */
+LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
+                                        CapStyle capStyle,
+                                        DrawType drawType,
+                                        double thickness)
+    :QDialog(parent)
+{
+
+    setWindowTitle(tr("Line Dialog"));
+}
+
+/**
+ * @brief PenDialog::PenDialog - Dialogue for selecting pen size and cap style.
+ *
+ */
+PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, double size)
+    :QDialog(parent)
+{
+
+    setWindowTitle(tr("Pen Dialog"));
+}
+
+/**
+ * @brief EraserDialog::EraserDialog - Dialogue for choosing eraser thickness.
+ *
+ */
+EraserDialog::EraserDialog(QWidget* parent, double thickness)
+    :QDialog(parent)
+{
+    setWindowTitle(tr("Eraser Dialog"));
+}
+
+/**
+ * @brief RectDialog::RectDialog - Dialogue for selecting what kind of rectangle to draw.
+ *
+ */
+RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shapeType,
+                                        FillColor fillColor, BoundaryType boundaryType,
+                                        double thickness, double curve)
+    :QDialog(parent)
+{
+    setWindowTitle(tr("Rectangle Dialog"));
+}
+
