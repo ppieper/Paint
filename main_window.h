@@ -1,8 +1,3 @@
-#include <QtWidgets>
-#include <QGraphicsScene>
-#include <QGraphicsView>
-#include <QGraphicsItem>
-
 #include "dialog_windows.h"
 
 #ifndef _MAIN_WINDOW_H

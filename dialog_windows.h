@@ -1,4 +1,5 @@
 #include <qmessagebox.h>
+#include <QtWidgets>
 
 #ifndef DIALOG_WINDOWS_H
 #define DIALOG_WINDOWS_H
@@ -46,7 +47,7 @@ public:
     LineDialog(QWidget* parent, LineStyle lineStyle = solid,
                                 CapStyle capStyle = round_cap,
                                 DrawType = single,
-                                double thickness = 0);
+                                int thickness = 0);
 
 public slots:
 
@@ -59,7 +60,7 @@ class PenDialog : public QDialog
     Q_OBJECT
 
 public:
-    PenDialog(QWidget* parent, CapStyle = round_cap, double size = 0);
+    PenDialog(QWidget* parent, CapStyle = round_cap, int size = 0);
 
 public slots:
 
@@ -73,7 +74,7 @@ class EraserDialog : public QDialog
     Q_OBJECT
 
 public:
-    EraserDialog(QWidget* parent, double thickness = 0);
+    EraserDialog(QWidget* parent, int thickness = 0);
 
 public slots:
 
@@ -89,7 +90,7 @@ class RectDialog : public QDialog
 public:
     RectDialog(QWidget* parent, LineStyle = solid, ShapeType = rectangle,
                                 FillColor = no_fill, BoundaryType = miter_join,
-                                double thickness = 0, double curve = 0);
+                                int thickness = 0, int curve = 0);
 
 public slots:
 

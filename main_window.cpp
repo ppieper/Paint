@@ -26,7 +26,8 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     toolbar = new ToolBar(this);
     addToolBar(toolbar);
     image = new QPixmap();
-
+    RectDialog *pen = new RectDialog (this);
+    pen->show();
     setWindowTitle(name);
     resize(QDesktopWidget().availableGeometry(this).size()*.6);
     setContextMenuPolicy(Qt::PreventContextMenu);
@@ -88,12 +89,11 @@ void MainWindow::OnLoadImage()
         QPixmap old_image = image->copy(QRect());
 
 		image->load(s);
+        this->repaint();
 
         // for undo/redo
         saveCommand(old_image);
 	}
-
-    this->repaint();
 }
 
 /**
@@ -265,6 +265,10 @@ ToolBar::ToolBar(QWidget *parent)
     createActions();
 }
 
+/**
+ * @brief ToolBar::createActions - Create the toolbar actions and
+ *                                 give each one an icon.
+ */
 void ToolBar::createActions()
 {
     // load button icons from files
@@ -343,124 +347,5 @@ void ToolBar::createActions()
     this->addAction(line_icon, "Line Tool");
     this->addAction(eraser_icon, "Eraser");
     this->addAction(rect_icon, "Rectangle Tool");
-}
-
-/**
- * @brief CanvasSizeDialog::CanvasSizeDialog - Dialogue for creating a new canvas.
- *                                             Construct a dialog box containing
- *                                             QSpinBoxes and QPushButtons for this.
- */
-CanvasSizeDialog::CanvasSizeDialog(QWidget* parent, const char* name, int width, int height)
-    :QDialog(parent)
-{
-    createSpinBoxes(width,height);
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(spinBoxesGroup);
-    setLayout(layout);
-
-    setWindowTitle(tr(name));
-}
-
-/**
- * @brief NewCanvasDialog::createSpinBoxes - Create the QSpinBoxes for the dialog
- *                                           box as well as the buttons.
- */
-void CanvasSizeDialog::createSpinBoxes(int width, int height)
-{
-    spinBoxesGroup = new QGroupBox(tr("Image Size"), this);
-
-    // the width field
-    widthSpinBox = new QSpinBox(this);
-    widthSpinBox->setRange(1, 10000);
-    widthSpinBox->setSingleStep(1);
-    widthSpinBox->setValue(width);
-    widthSpinBox->setSuffix("px");
-
-    // the height field
-    heightSpinBox = new QSpinBox(this);
-    heightSpinBox->setRange(1, 10000);
-    heightSpinBox->setSingleStep(1);
-    heightSpinBox->setValue(height);
-    heightSpinBox->setSuffix("px");
-
-    // the buttons
-    QPushButton *okButton = new QPushButton("OK", this);
-    QPushButton *cancelButton = new QPushButton("Cancel", this);
-    connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-
-    // put it all together
-    QFormLayout *spinBoxLayout = new QFormLayout;
-    spinBoxLayout->addRow(tr("Width: "), widthSpinBox);
-    spinBoxLayout->addRow(tr("Height: "), heightSpinBox);
-    spinBoxLayout->addRow(okButton);
-    spinBoxLayout->addRow(cancelButton);
-    spinBoxesGroup->setLayout(spinBoxLayout);
-}
-
-/**
- * @brief NewCanvasDialog::getWidthValue
- *
- * @return the width selected by the user
- */
-int CanvasSizeDialog::getWidthValue() const
-{
-    return widthSpinBox->value();
-}
-
-/**
- * @brief NewCanvasDialog::getHeightValue
- *
- * @return the height selected by the user
- */
-int CanvasSizeDialog::getHeightValue() const
-{
-    return heightSpinBox->value();
-}
-
-/**
- * @brief LineDialog::LineSizeDialog - Dialogue selecting what kind of line to draw.
- */
-LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
-                                        CapStyle capStyle,
-                                        DrawType drawType,
-                                        double thickness)
-    :QDialog(parent)
-{
-
-    setWindowTitle(tr("Line Dialog"));
-}
-
-/**
- * @brief PenDialog::PenDialog - Dialogue for selecting pen size and cap style.
- *
- */
-PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, double size)
-    :QDialog(parent)
-{
-
-    setWindowTitle(tr("Pen Dialog"));
-}
-
-/**
- * @brief EraserDialog::EraserDialog - Dialogue for choosing eraser thickness.
- *
- */
-EraserDialog::EraserDialog(QWidget* parent, double thickness)
-    :QDialog(parent)
-{
-    setWindowTitle(tr("Eraser Dialog"));
-}
-
-/**
- * @brief RectDialog::RectDialog - Dialogue for selecting what kind of rectangle to draw.
- *
- */
-RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shapeType,
-                                        FillColor fillColor, BoundaryType boundaryType,
-                                        double thickness, double curve)
-    :QDialog(parent)
-{
-    setWindowTitle(tr("Rectangle Dialog"));
 }
 
