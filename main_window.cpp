@@ -12,7 +12,11 @@ const int TOOLBAR_HEIGHT = 39;
 MainWindow::MainWindow(QWidget* parent, const char* name)
     :QMainWindow(parent)
 {
+    // initialize the undo stack
     undoStack = new QUndoStack(this);
+
+    // default tool
+    currentTool = pen;
 
     // create menu items
     QMenu* file = new QMenu("File", this);
@@ -235,6 +239,78 @@ void MainWindow::OnPickColor(int which)
 }
 
 /**
+ * @brief MainWindow::OnChangeTool - Sets the current tool based on argument.
+ *
+ */
+void MainWindow::OnChangeTool(int newTool)
+{
+    currentTool = (ToolType) newTool;
+}
+
+/**
+ * @brief MainWindow::OnPenDialog - Open a PenDialog prompting the user to change pen settings.
+ *
+ */
+void MainWindow::OnPenDialog()
+{
+    PenDialog *penDialog = new PenDialog(this);
+    penDialog->exec();
+
+    delete penDialog;
+}
+
+/**
+ * @brief MainWindow::OnLineDialog - Open a LineDialog prompting the user to change line tool settings.
+ *
+ */
+void MainWindow::OnLineDialog()
+{
+    LineDialog *lineDialog = new LineDialog(this);
+    lineDialog->exec();
+
+    delete lineDialog;
+}
+
+/**
+ * @brief MainWindow::OnEraserDialog - Open a EraserDialog prompting the user to change eraser settings.
+ *
+ */
+void MainWindow::OnEraserDialog()
+{
+    EraserDialog *eraserDialog = new EraserDialog(this);
+    eraserDialog->exec();
+
+    delete eraserDialog;
+}
+
+/**
+ * @brief MainWindow::OnRectangleDialog - Open a RectDialog prompting the user to change rect tool settings.
+ *
+ */
+void MainWindow::OnRectangleDialog()
+{
+    RectDialog *rectDialog = new RectDialog(this);
+    rectDialog->exec();
+
+    delete rectDialog;
+}
+
+/**
+ * @brief MainWindow::openToolDialog - call the appropriate dialog function based on the current tool.
+ *
+ */
+void MainWindow::openToolDialog()
+{
+    switch(currentTool)
+    {
+        case pen: OnPenDialog();             break;
+        case line: OnLineDialog();           break;
+        case eraser: OnEraserDialog();       break;
+        case rect_tool: OnRectangleDialog(); break;
+    }
+}
+
+/**
  * @brief MainWindow::mousePressEvent - On mouse click, draw or open dialog menu.
  *
  */
@@ -246,7 +322,7 @@ void MainWindow::mousePressEvent(QMouseEvent *e)
         // use tools
     }
     else if(e->button() == Qt::RightButton) {
-        // open dialogue menu
+        openToolDialog();
     }
 }
 
@@ -329,19 +405,41 @@ void ToolBar::createActions()
     connect(redo_action, &QAction::triggered, mainWindow, &MainWindow::OnRedo);
 
     // color pickers
-    QSignalMapper *signalMapper = new QSignalMapper(this);
+    QSignalMapper *signalMapperC = new QSignalMapper(this);
 
     QAction *fcolor_action = new QAction(fcolor_icon, "Foreground Color", this);
     fcolor_action->setShortcut(tr("Ctrl+F"));
-    connect(fcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
+    connect(fcolor_action, SIGNAL(triggered()), signalMapperC, SLOT(map()));
     QAction *bcolor_action = new QAction(bcolor_icon, "Background Color", this);
     bcolor_action->setShortcut(tr("Ctrl+B"));
-    connect(bcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
+    connect(bcolor_action, SIGNAL(triggered()), signalMapperC, SLOT(map()));
 
-    signalMapper->setMapping(fcolor_action, foreground);
-    signalMapper->setMapping(bcolor_action, background);
+    signalMapperC->setMapping(fcolor_action, foreground);
+    signalMapperC->setMapping(bcolor_action, background);
 
-    connect(signalMapper, SIGNAL(mapped(int)), mainWindow, SLOT(OnPickColor(int)));
+    connect(signalMapperC, SIGNAL(mapped(int)), mainWindow, SLOT(OnPickColor(int)));
+
+    // tool pickers
+    QSignalMapper *signalMapperT = new QSignalMapper(this);
+
+    QAction *pen_action = new QAction(pen_icon, "Pen Tool", this);
+    connect(pen_action, SIGNAL(triggered()), signalMapperT, SLOT(map()));
+
+    QAction *line_action = new QAction(line_icon, "Line Tool", this);
+    connect(line_action, SIGNAL(triggered()), signalMapperT, SLOT(map()));
+
+    QAction *eraser_action = new QAction(eraser_icon, "Eraser", this);
+    connect(eraser_action, SIGNAL(triggered()), signalMapperT, SLOT(map()));
+
+    QAction *rect_action = new QAction(rect_icon, "Rectangle Tool", this);
+    connect(rect_action, SIGNAL(triggered()), signalMapperT, SLOT(map()));
+
+    signalMapperT->setMapping(pen_action, pen);
+    signalMapperT->setMapping(line_action, line);
+    signalMapperT->setMapping(eraser_action, eraser);
+    signalMapperT->setMapping(rect_action, rect_tool);
+
+    connect(signalMapperT, SIGNAL(mapped(int)), mainWindow, SLOT(OnChangeTool(int)));
 
     // add the actions
     this->addAction(new_action);
@@ -354,9 +452,9 @@ void ToolBar::createActions()
     this->addAction(fcolor_action);
     this->addAction(bcolor_action);
     this->addSeparator();
-    this->addAction(pen_icon, "Pen Tool");
-    this->addAction(line_icon, "Line Tool");
-    this->addAction(eraser_icon, "Eraser");
-    this->addAction(rect_icon, "Rectangle Tool");
+    this->addAction(pen_action);
+    this->addAction(line_action);
+    this->addAction(eraser_action);
+    this->addAction(rect_action);
 }
 

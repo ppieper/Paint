@@ -3,6 +3,8 @@
 #ifndef _MAIN_WINDOW_H
 #define _MAIN_WINDOW_H
 
+enum ToolType {pen, line, eraser, rect_tool};
+
 class ToolBar : public QToolBar
 {
     Q_OBJECT
@@ -31,6 +33,9 @@ class MainWindow: public QMainWindow {
 	/** paint handler */
 	void paintEvent(QPaintEvent *);
 
+    /** tool dialog dispatcher */
+    void openToolDialog();
+
 	public slots:
     void OnNewImage();
 	void OnLoadImage();
@@ -39,6 +44,11 @@ class MainWindow: public QMainWindow {
     void OnRedo();
     void OnClearAll();
     void OnResizeImage();
+    void OnChangeTool(int);
+    void OnPenDialog();
+    void OnLineDialog();
+    void OnEraserDialog();
+    void OnRectangleDialog();
     void OnPickColor(int);
 
 	private:
@@ -49,6 +59,7 @@ class MainWindow: public QMainWindow {
     ToolBar* toolbar;
     QColor foregroundColor = Qt::white;
     QColor backgroundColor = Qt::white;
+    ToolType currentTool;
 };
 
 #endif

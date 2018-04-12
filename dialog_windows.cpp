@@ -131,10 +131,10 @@ QGroupBox* LineDialog::createLineStyle(LineStyle lineStyle)
 
     switch(lineStyle)
     {
-    case solid: solidButton->setChecked(true); break;
-    case dashed: dashedButton->setChecked(true); break;
-    case dotted: dottedButton->setChecked(true); break;
-    case dash_dotted: dashDottedButton->setChecked(true); break;
+    case solid: solidButton->setChecked(true);                   break;
+    case dashed: dashedButton->setChecked(true);                 break;
+    case dotted: dottedButton->setChecked(true);                 break;
+    case dash_dotted: dashDottedButton->setChecked(true);        break;
     case dash_dot_dotted: dashDotDottedButton->setChecked(true); break;
     default: break;
     }
@@ -164,9 +164,9 @@ QGroupBox* LineDialog::createCapStyle(CapStyle capStyle)
 
     switch(capStyle)
     {
-    case flat: flatButton->setChecked(true); break;
-    case square: squareButton->setChecked(true);break;
-    case round_cap: roundButton->setChecked(true);break;
+    case flat: flatButton->setChecked(true);       break;
+    case square: squareButton->setChecked(true);   break;
+    case round_cap: roundButton->setChecked(true); break;
     default: break;
     }
 
@@ -192,7 +192,7 @@ QGroupBox* LineDialog::createDrawType(DrawType drawType)
     switch(drawType)
     {
     case single: singleButton->setChecked(true); break;
-    case poly: polyButton->setChecked(true);break;
+    case poly: polyButton->setChecked(true);     break;
     default: break;
     }
 
@@ -239,9 +239,9 @@ QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
 
     switch(capStyle)
     {
-    case flat: flatButton->setChecked(true); break;
-    case square: squareButton->setChecked(true);break;
-    case round_cap: roundButton->setChecked(true);break;
+    case flat: flatButton->setChecked(true);       break;
+    case square: squareButton->setChecked(true);   break;
+    case round_cap: roundButton->setChecked(true); break;
     default: break;
     }
 
@@ -337,10 +337,10 @@ QGroupBox* RectDialog::createBoundaryStyle(LineStyle boundaryStyle)
 
     switch(boundaryStyle)
     {
-    case solid: solidButton->setChecked(true); break;
-    case dashed: dashedButton->setChecked(true); break;
-    case dotted: dottedButton->setChecked(true); break;
-    case dash_dotted: dashDottedButton->setChecked(true); break;
+    case solid: solidButton->setChecked(true);                   break;
+    case dashed: dashedButton->setChecked(true);                 break;
+    case dotted: dottedButton->setChecked(true);                 break;
+    case dash_dotted: dashDottedButton->setChecked(true);        break;
     case dash_dot_dotted: dashDotDottedButton->setChecked(true); break;
     default: break;
     }
@@ -370,9 +370,9 @@ QGroupBox* RectDialog::createShapeType(ShapeType shapeType)
 
     switch(shapeType)
     {
-    case rectangle: rectangleButton->setChecked(true); break;
+    case rectangle: rectangleButton->setChecked(true);          break;
     case rounded_rectangle: rRectangleButton->setChecked(true); break;
-    case ellipse: ellipseButton->setChecked(true); break;
+    case ellipse: ellipseButton->setChecked(true);              break;
     default: break;
     }
 
@@ -401,7 +401,7 @@ QGroupBox* RectDialog::createFillColor(FillColor fillColor)
     {
     case foreground: foregroundButton->setChecked(true); break;
     case background: backgroundButton->setChecked(true); break;
-    case no_fill: noFillButton->setChecked(true); break;
+    case no_fill: noFillButton->setChecked(true);        break;
     default: break;
     }
 
