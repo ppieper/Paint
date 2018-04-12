@@ -26,8 +26,8 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     toolbar = new ToolBar(this);
     addToolBar(toolbar);
     image = new QPixmap();
-    RectDialog *pen = new RectDialog (this);
-    pen->show();
+
+    // adjust window size, name, & stop context menu
     setWindowTitle(name);
     resize(QDesktopWidget().availableGeometry(this).size()*.6);
     setContextMenuPolicy(Qt::PreventContextMenu);
@@ -234,9 +234,20 @@ void MainWindow::OnPickColor(int which)
     delete colorDialog;
 }
 
-void MainWindow::mousePressEvent(QMouseEvent * e)
+/**
+ * @brief MainWindow::mousePressEvent - On mouse click, draw or open dialog menu.
+ *
+ */
+void MainWindow::mousePressEvent(QMouseEvent *e)
 {
-    //paintEvent(new QPaintEvent(QRect(0,0,640,480)));
+    if(e->button() == Qt::LeftButton) {
+        if(image->isNull())
+            return;
+        // use tools
+    }
+    else if(e->button() == Qt::RightButton) {
+        // open dialogue menu
+    }
 }
 
 /**

@@ -52,7 +52,13 @@ public:
 public slots:
 
 private:
-    void createSpinBoxes(int,int);
+    QButtonGroup* lineStyleG;
+    QButtonGroup* capStyleG;
+    QButtonGroup* drawTypeG;
+    QSlider* lineThicknessSlider;
+    QGroupBox* createLineStyle(LineStyle);
+    QGroupBox* createCapStyle(CapStyle);
+    QGroupBox* createDrawType(DrawType);
 };
 
 class PenDialog : public QDialog
@@ -65,8 +71,9 @@ public:
 public slots:
 
 private:
-    void createSpinBoxes(int,int);
-
+    QButtonGroup* capStyleG;
+    QSlider* penSizeSlider;
+    QGroupBox* createCapStyle(CapStyle);
 };
 
 class EraserDialog : public QDialog
@@ -79,8 +86,7 @@ public:
 public slots:
 
 private:
-    void createSpinBoxes(int,int);
-
+    QSlider* eraserThicknessSlider;
 };
 
 class RectDialog : public QDialog
@@ -95,8 +101,16 @@ public:
 public slots:
 
 private:
-    void createSpinBoxes(int,int);
-
+    QButtonGroup* boundaryStyleG;
+    QButtonGroup* shapeTypeG;
+    QButtonGroup* fillColorG;
+    QButtonGroup* boundaryTypeG;
+    QSlider* lineThicknessSlider;
+    QSlider* rRectCurveSlider;
+    QGroupBox* createBoundaryStyle(LineStyle);
+    QGroupBox* createShapeType(ShapeType);
+    QGroupBox* createFillColor(FillColor);
+    QGroupBox* createBoundaryType(BoundaryType);
 };
 
 #endif // DIALOGS_H

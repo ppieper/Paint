@@ -87,6 +87,34 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
 
     setWindowTitle(tr("Line Dialog"));
 
+    QGroupBox*left = new QGroupBox(this);
+
+    QVBoxLayout *vboxL = new QVBoxLayout(this);
+    vboxL->addWidget(createLineStyle(lineStyle));
+    left->setLayout(vboxL);
+
+    QGroupBox *right = new QGroupBox(this);
+
+    QVBoxLayout *vboxR = new QVBoxLayout(this);
+    vboxR->addWidget(createCapStyle(capStyle));
+    vboxR->addWidget(createDrawType(drawType));
+    right->setLayout(vboxR);
+
+    QLabel *lineThicknessLabel = new QLabel(tr("Line Thickness"), this);
+    lineThicknessSlider = new QSlider(Qt::Horizontal, this);
+    lineThicknessSlider->setMaximum(MAX_BRUSH_SIZE);
+    lineThicknessSlider->setSliderPosition(thickness);
+
+    QGridLayout *grid = new QGridLayout(this);
+    grid->addWidget(left, 0,0);
+    grid->addWidget(right, 0, 1);
+    grid->addWidget(lineThicknessLabel, 2, 0, 1, 2);
+    grid->addWidget(lineThicknessSlider, 3, 0, 1, 2);
+    setLayout(grid);
+}
+
+QGroupBox* LineDialog::createLineStyle(LineStyle lineStyle)
+{
     QGroupBox *lineStyles = new QGroupBox(tr("Line Style"), this);
     QRadioButton *solidButton = new QRadioButton(tr("Solid"), this);
     QRadioButton *dashedButton = new QRadioButton(tr("Dashed"), this);
@@ -94,34 +122,45 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
     QRadioButton *dashDottedButton = new QRadioButton(tr("Dash-Dotted"), this);
     QRadioButton *dashDotDottedButton = new QRadioButton(tr("Dash-Dot-Dotted"), this);
 
+    lineStyleG = new QButtonGroup(this);
+    lineStyleG->addButton(solidButton, 0);
+    lineStyleG->addButton(dashedButton, 1);
+    lineStyleG->addButton(dottedButton, 2);
+    lineStyleG->addButton(dashDottedButton, 3);
+    lineStyleG->addButton(dashDotDottedButton, 4);
+
     switch(lineStyle)
     {
     case solid: solidButton->setChecked(true); break;
-    case dashed: dashedButton->setChecked(true);break;
-    case dotted: dottedButton->setChecked(true);break;
+    case dashed: dashedButton->setChecked(true); break;
+    case dotted: dottedButton->setChecked(true); break;
     case dash_dotted: dashDottedButton->setChecked(true); break;
-    case dash_dot_dotted: dashDotDottedButton->setChecked(true);break;
+    case dash_dot_dotted: dashDotDottedButton->setChecked(true); break;
     default: break;
     }
 
-    QVBoxLayout *vbox0 = new QVBoxLayout(this);
-    vbox0->addWidget(solidButton);
-    vbox0->addWidget(dashedButton);
-    vbox0->addWidget(dottedButton);
-    vbox0->addWidget(dashDottedButton);
-    vbox0->addWidget(dashDotDottedButton);
-    lineStyles->setLayout(vbox0);
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(solidButton);
+    vbox->addWidget(dashedButton);
+    vbox->addWidget(dottedButton);
+    vbox->addWidget(dashDottedButton);
+    vbox->addWidget(dashDotDottedButton);
+    lineStyles->setLayout(vbox);
 
-    QGroupBox*left = new QGroupBox(this);
+    return lineStyles;
+}
 
-    QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox->addWidget(lineStyles);
-    left->setLayout(vbox);
-
+QGroupBox* LineDialog::createCapStyle(CapStyle capStyle)
+{
     QGroupBox *capStyles = new QGroupBox(tr("Cap Style"), this);
     QRadioButton *flatButton = new QRadioButton(tr("Flat"), this);
     QRadioButton *squareButton = new QRadioButton(tr("Square"), this);
     QRadioButton *roundButton = new QRadioButton(tr("Round"), this);
+
+    capStyleG = new QButtonGroup(this);
+    capStyleG->addButton(flatButton, 0);
+    capStyleG->addButton(squareButton, 1);
+    capStyleG->addButton(roundButton, 2);
 
     switch(capStyle)
     {
@@ -131,15 +170,24 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
     default: break;
     }
 
-    QVBoxLayout *vbox1 = new QVBoxLayout(this);
-    vbox1->addWidget(flatButton);
-    vbox1->addWidget(squareButton);
-    vbox1->addWidget(roundButton);
-    capStyles->setLayout(vbox1);
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(flatButton);
+    vbox->addWidget(squareButton);
+    vbox->addWidget(roundButton);
+    capStyles->setLayout(vbox);
 
+    return capStyles;
+}
+
+QGroupBox* LineDialog::createDrawType(DrawType drawType)
+{
     QGroupBox *drawTypes = new QGroupBox(tr("Draw Type"), this);
     QRadioButton *singleButton = new QRadioButton(tr("Single"), this);
     QRadioButton *polyButton = new QRadioButton(tr("Poly"), this);
+
+    drawTypeG = new QButtonGroup(this);
+    drawTypeG->addButton(singleButton, 0);
+    drawTypeG->addButton(polyButton, 1);
 
     switch(drawType)
     {
@@ -148,29 +196,12 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
     default: break;
     }
 
-    QVBoxLayout *vbox2 = new QVBoxLayout(this);
-    vbox2->addWidget(singleButton);
-    vbox2->addWidget(polyButton);
-    drawTypes->setLayout(vbox2);
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(singleButton);
+    vbox->addWidget(polyButton);
+    drawTypes->setLayout(vbox);
 
-    QGroupBox *right = new QGroupBox(this);
-
-    QVBoxLayout *vbox3 = new QVBoxLayout(this);
-    vbox3->addWidget(capStyles);
-    vbox3->addWidget(drawTypes);
-    right->setLayout(vbox3);
-
-    QLabel *lineThicknessLabel = new QLabel(tr("Line Thickness"), this);
-    QSlider *lineThickness = new QSlider(Qt::Horizontal, this);
-    lineThickness->setMaximum(MAX_BRUSH_SIZE);
-    lineThickness->setSliderPosition(thickness);
-
-    QGridLayout *grid = new QGridLayout(this);
-    grid->addWidget(left, 0,0);
-    grid->addWidget(right, 0, 1);
-    grid->addWidget(lineThicknessLabel, 2, 0, 1, 2);
-    grid->addWidget(lineThickness, 3, 0, 1, 2);
-    setLayout(grid);
+    return drawTypes;
 }
 
 /**
@@ -182,10 +213,29 @@ PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
 {
     setWindowTitle(tr("Pen Dialog"));
 
+    QLabel *penSizeLabel = new QLabel(tr("Pen Size"), this);
+    penSizeSlider = new QSlider(Qt::Horizontal, this);
+    penSizeSlider->setMaximum(MAX_BRUSH_SIZE);
+    penSizeSlider->setSliderPosition(size);
+
+    QVBoxLayout *vbox = new QVBoxLayout(this);
+    vbox->addWidget(createCapStyle(capStyle));
+    vbox->addWidget(penSizeLabel);
+    vbox->addWidget(penSizeSlider);
+    setLayout(vbox);
+}
+
+QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
+{
     QGroupBox *capStyles = new QGroupBox(tr("Cap Style"), this);
     QRadioButton *flatButton = new QRadioButton(tr("Flat"), this);
     QRadioButton *squareButton = new QRadioButton(tr("Square"), this);
     QRadioButton *roundButton = new QRadioButton(tr("Round"), this);
+
+    capStyleG = new QButtonGroup(this);
+    capStyleG->addButton(flatButton, 0);
+    capStyleG->addButton(squareButton, 1);
+    capStyleG->addButton(roundButton, 2);
 
     switch(capStyle)
     {
@@ -195,22 +245,13 @@ PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
     default: break;
     }
 
-    QHBoxLayout *hbox = new QHBoxLayout(this);
+    QHBoxLayout *hbox = new QHBoxLayout();
     hbox->addWidget(flatButton);
     hbox->addWidget(squareButton);
     hbox->addWidget(roundButton);
     capStyles->setLayout(hbox);
 
-    QLabel *penSizeLabel = new QLabel(tr("Pen Size"), this);
-    QSlider *penSize = new QSlider(Qt::Horizontal, this);
-    penSize->setMaximum(MAX_BRUSH_SIZE);
-    penSize->setSliderPosition(size);
-
-    QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox->addWidget(capStyles);
-    vbox->addWidget(penSizeLabel);
-    vbox->addWidget(penSize);
-    setLayout(vbox);
+    return capStyles;
 }
 
 /**
@@ -223,13 +264,13 @@ EraserDialog::EraserDialog(QWidget* parent, int thickness)
     setWindowTitle(tr("Eraser Dialog"));
 
     QLabel *eraserThicknessLabel = new QLabel(tr("Eraser Thickness"), this);
-    QSlider *eraserThickness = new QSlider(Qt::Horizontal, this);
-    eraserThickness->setMaximum(MAX_BRUSH_SIZE);
-    eraserThickness->setSliderPosition(thickness);
+    eraserThicknessSlider = new QSlider(Qt::Horizontal, this);
+    eraserThicknessSlider->setMaximum(MAX_BRUSH_SIZE);
+    eraserThicknessSlider->setSliderPosition(thickness);
 
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->addWidget(eraserThicknessLabel);
-    vbox->addWidget(eraserThickness);
+    vbox->addWidget(eraserThicknessSlider);
     setLayout(vbox);
 }
 
@@ -244,41 +285,88 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
 {
     setWindowTitle(tr("Rectangle Dialog"));
 
-    QGroupBox *lineStyles = new QGroupBox(tr("Boundary Style"), this);
+    QGroupBox*left = new QGroupBox(this);
+
+    QVBoxLayout *vboxL = new QVBoxLayout(this);
+    vboxL->addWidget(createBoundaryStyle(boundaryStyle));
+    left->setLayout(vboxL);
+
+    QGroupBox *right = new QGroupBox(this);
+
+    QVBoxLayout *vboxR = new QVBoxLayout(this);
+    vboxR->addWidget(createShapeType(shapeType));
+    vboxR->addWidget(createFillColor(fillColor));
+    vboxR->addWidget(createBoundaryType(boundaryType));
+    right->setLayout(vboxR);
+
+    QLabel *lineThicknessLabel = new QLabel(tr("Line Thickness"), this);
+    lineThicknessSlider = new QSlider(Qt::Horizontal, this);
+    lineThicknessSlider->setMaximum(MAX_BRUSH_SIZE);
+    lineThicknessSlider->setSliderPosition(thickness);
+
+    QLabel *rRectCurveLabel = new QLabel(tr("Rounded Rectangle Curve"), this);
+    rRectCurveSlider = new QSlider(Qt::Horizontal, this);
+    rRectCurveSlider->setMaximum(MAX_BRUSH_SIZE);
+    rRectCurveSlider->setSliderPosition(curve);
+
+    QGridLayout *grid = new QGridLayout(this);
+    grid->addWidget(left, 0,0);
+    grid->addWidget(right, 0, 1);
+    grid->addWidget(lineThicknessLabel, 1, 0, 1, 2);
+    grid->addWidget(lineThicknessSlider, 2, 0, 1, 2);
+    grid->addWidget(rRectCurveLabel, 3, 0, 1, 2);
+    grid->addWidget(rRectCurveSlider, 4, 0, 1, 2);
+    setLayout(grid);
+}
+
+QGroupBox* RectDialog::createBoundaryStyle(LineStyle boundaryStyle)
+{
+    QGroupBox *boundaryStyles = new QGroupBox(tr("Boundary Style"), this);
     QRadioButton *solidButton = new QRadioButton(tr("Solid"), this);
     QRadioButton *dashedButton = new QRadioButton(tr("Dashed"), this);
     QRadioButton *dottedButton = new QRadioButton(tr("Dotted"), this);
     QRadioButton *dashDottedButton = new QRadioButton(tr("Dash-Dotted"), this);
     QRadioButton *dashDotDottedButton = new QRadioButton(tr("Dash-Dot-Dotted"), this);
 
+    boundaryStyleG = new QButtonGroup(this);
+    boundaryStyleG->addButton(solidButton, 0 );
+    boundaryStyleG->addButton(dashedButton, 1);
+    boundaryStyleG->addButton(dottedButton, 2);
+    boundaryStyleG->addButton(dashDottedButton, 3);
+    boundaryStyleG->addButton(dashDotDottedButton, 4);
+
     switch(boundaryStyle)
     {
     case solid: solidButton->setChecked(true); break;
-    case dashed: dashedButton->setChecked(true);break;
-    case dotted: dottedButton->setChecked(true);break;
+    case dashed: dashedButton->setChecked(true); break;
+    case dotted: dottedButton->setChecked(true); break;
     case dash_dotted: dashDottedButton->setChecked(true); break;
-    case dash_dot_dotted: dashDotDottedButton->setChecked(true);break;
+    case dash_dot_dotted: dashDotDottedButton->setChecked(true); break;
     default: break;
     }
 
-    QVBoxLayout *vbox0 = new QVBoxLayout(this);
-    vbox0->addWidget(solidButton);
-    vbox0->addWidget(dashedButton);
-    vbox0->addWidget(dottedButton);
-    vbox0->addWidget(dashDottedButton);
-    vbox0->addWidget(dashDotDottedButton);
-    lineStyles->setLayout(vbox0);
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(solidButton);
+    vbox->addWidget(dashedButton);
+    vbox->addWidget(dottedButton);
+    vbox->addWidget(dashDottedButton);
+    vbox->addWidget(dashDotDottedButton);
+    boundaryStyles->setLayout(vbox);
 
-    QGroupBox*left = new QGroupBox(this);
+    return boundaryStyles;
+}
 
-    QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox->addWidget(lineStyles);
-    left->setLayout(vbox);
-
+QGroupBox* RectDialog::createShapeType(ShapeType shapeType)
+{
     QGroupBox *shapeTypes = new QGroupBox(tr("Shape Type"), this);
     QRadioButton *rectangleButton = new QRadioButton(tr("Rectangle"), this);
     QRadioButton *rRectangleButton = new QRadioButton(tr("Rounded Rectangle"), this);
     QRadioButton *ellipseButton = new QRadioButton(tr("Ellipse"), this);
+
+    shapeTypeG = new QButtonGroup(this);
+    shapeTypeG->addButton(rectangleButton, 0);
+    shapeTypeG->addButton(rRectangleButton, 1);
+    shapeTypeG->addButton(ellipseButton, 2);
 
     switch(shapeType)
     {
@@ -288,16 +376,26 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     default: break;
     }
 
-    QVBoxLayout *vbox1 = new QVBoxLayout(this);
-    vbox1->addWidget(rectangleButton);
-    vbox1->addWidget(rRectangleButton);
-    vbox1->addWidget(ellipseButton);
-    shapeTypes->setLayout(vbox1);
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(rectangleButton);
+    vbox->addWidget(rRectangleButton);
+    vbox->addWidget(ellipseButton);
+    shapeTypes->setLayout(vbox);
 
+    return shapeTypes;
+}
+
+QGroupBox* RectDialog::createFillColor(FillColor fillColor)
+{
     QGroupBox *fillColors = new QGroupBox(tr("Fill Color"), this);
     QRadioButton *foregroundButton = new QRadioButton(tr("Foreground"), this);
     QRadioButton *backgroundButton = new QRadioButton(tr("Background"), this);
     QRadioButton *noFillButton = new QRadioButton(tr("No Fill"), this);
+
+    fillColorG = new QButtonGroup(this);
+    fillColorG->addButton(foregroundButton, 0);
+    fillColorG->addButton(backgroundButton, 1);
+    fillColorG->addButton(noFillButton, 2);
 
     switch(fillColor)
     {
@@ -307,16 +405,27 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     default: break;
     }
 
-    QVBoxLayout *vbox2 = new QVBoxLayout(this);
-    vbox2->addWidget(foregroundButton);
-    vbox2->addWidget(backgroundButton);
-    vbox2->addWidget(noFillButton);
-    fillColors->setLayout(vbox2);
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(foregroundButton);
+    vbox->addWidget(backgroundButton);
+    vbox->addWidget(noFillButton);
+    fillColors->setLayout(vbox);
 
+    return fillColors;
+
+}
+
+QGroupBox* RectDialog::createBoundaryType(BoundaryType boundaryType)
+{
     QGroupBox *boundaryTypes = new QGroupBox(tr("Boundary Type"), this);
     QRadioButton *miterJoinButton = new QRadioButton(tr("Miter Join"), this);
     QRadioButton *bevelJoinButton = new QRadioButton(tr("Bevel Join"), this);
     QRadioButton *roundJoinButton = new QRadioButton(tr("Round Join"), this);
+
+    boundaryTypeG = new QButtonGroup(this);
+    boundaryTypeG->addButton(miterJoinButton, 0);
+    boundaryTypeG->addButton(bevelJoinButton, 1);
+    boundaryTypeG->addButton(roundJoinButton, 2);
 
     switch(boundaryType)
     {
@@ -326,36 +435,11 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     default: break;
     }
 
-    QVBoxLayout *vbox4 = new QVBoxLayout(this);
-    vbox4->addWidget(miterJoinButton);
-    vbox4->addWidget(bevelJoinButton);
-    vbox4->addWidget(roundJoinButton);
-    boundaryTypes->setLayout(vbox4);
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->addWidget(miterJoinButton);
+    vbox->addWidget(bevelJoinButton);
+    vbox->addWidget(roundJoinButton);
+    boundaryTypes->setLayout(vbox);
 
-    QGroupBox *right = new QGroupBox(this);
-
-    QVBoxLayout *vbox3 = new QVBoxLayout(this);
-    vbox3->addWidget(shapeTypes);
-    vbox3->addWidget(fillColors);
-    vbox3->addWidget(boundaryTypes);
-    right->setLayout(vbox3);
-
-    QLabel *lineThicknessLabel = new QLabel(tr("Line Thickness"), this);
-    QSlider *lineThickness = new QSlider(Qt::Horizontal, this);
-    lineThickness->setMaximum(MAX_BRUSH_SIZE);
-    lineThickness->setSliderPosition(thickness);
-
-    QLabel *rRectCurveLabel = new QLabel(tr("Rounded Rectangle Curve"), this);
-    QSlider *rRectCurve = new QSlider(Qt::Horizontal, this);
-    rRectCurve->setMaximum(MAX_BRUSH_SIZE);
-    rRectCurve->setSliderPosition(curve);
-
-    QGridLayout *grid = new QGridLayout(this);
-    grid->addWidget(left, 0,0);
-    grid->addWidget(right, 0, 1);
-    grid->addWidget(lineThicknessLabel, 3, 0, 1, 2);
-    grid->addWidget(lineThickness, 4, 0, 1, 2);
-    grid->addWidget(rRectCurveLabel, 5, 0, 1, 2);
-    grid->addWidget(rRectCurve, 6, 0, 1, 2);
-    setLayout(grid);
+    return boundaryTypes;
 }
