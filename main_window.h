@@ -52,6 +52,7 @@ class MainWindow: public QMainWindow {
     void OnPickColor(int);
 
 	private:
+    void createMenu();
     void saveCommand(QPixmap);
 
     QUndoStack* undoStack;

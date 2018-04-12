@@ -86,6 +86,7 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
 {
 
     setWindowTitle(tr("Line Dialog"));
+    setAttribute(Qt::WA_DeleteOnClose, true);
 
     QGroupBox*left = new QGroupBox(this);
 
@@ -212,6 +213,7 @@ PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
     :QDialog(parent)
 {
     setWindowTitle(tr("Pen Dialog"));
+    setAttribute(Qt::WA_DeleteOnClose, true);
 
     QLabel *penSizeLabel = new QLabel(tr("Pen Size"), this);
     penSizeSlider = new QSlider(Qt::Horizontal, this);
@@ -262,6 +264,7 @@ EraserDialog::EraserDialog(QWidget* parent, int thickness)
     :QDialog(parent)
 {
     setWindowTitle(tr("Eraser Dialog"));
+    setAttribute(Qt::WA_DeleteOnClose, true);
 
     QLabel *eraserThicknessLabel = new QLabel(tr("Eraser Thickness"), this);
     eraserThicknessSlider = new QSlider(Qt::Horizontal, this);
@@ -284,6 +287,7 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     :QDialog(parent)
 {
     setWindowTitle(tr("Rectangle Dialog"));
+    setAttribute(Qt::WA_DeleteOnClose, true);
 
     QGroupBox*left = new QGroupBox(this);
 
