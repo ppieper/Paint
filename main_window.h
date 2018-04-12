@@ -3,6 +3,7 @@
 #ifndef _MAIN_WINDOW_H
 #define _MAIN_WINDOW_H
 
+
 enum ToolType {pen, line, eraser, rect_tool};
 
 class ToolBar : public QToolBar
@@ -56,11 +57,17 @@ class MainWindow: public QMainWindow {
     void saveCommand(QPixmap);
 
     QUndoStack* undoStack;
-	QPixmap* image;
+    QPixmap* image;
     ToolBar* toolbar;
     QColor foregroundColor = Qt::white;
     QColor backgroundColor = Qt::white;
     ToolType currentTool;
+
+    /** dialog pointers - init to 0 */
+    PenDialog *penDialog = 0;
+    LineDialog *lineDialog = 0;
+    EraserDialog *eraserDialog = 0;
+    RectDialog *rectDialog = 0;
 };
 
 #endif

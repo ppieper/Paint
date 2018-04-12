@@ -76,6 +76,56 @@ int CanvasSizeDialog::getHeightValue() const
 }
 
 /**
+ * @brief PenDialog::PenDialog - Dialogue for selecting pen size and cap style.
+ *
+ */
+PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
+    :QDialog(parent)
+{
+    setWindowTitle(tr("Pen Dialog"));
+
+    QLabel *penSizeLabel = new QLabel(tr("Pen Size"), this);
+    penSizeSlider = new QSlider(Qt::Horizontal, this);
+    penSizeSlider->setMaximum(MAX_BRUSH_SIZE);
+    penSizeSlider->setSliderPosition(size);
+
+    QVBoxLayout *vbox = new QVBoxLayout(this);
+    vbox->addWidget(createCapStyle(capStyle));
+    vbox->addWidget(penSizeLabel);
+    vbox->addWidget(penSizeSlider);
+    setLayout(vbox);
+}
+
+QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
+{
+    QGroupBox *capStyles = new QGroupBox(tr("Cap Style"), this);
+    QRadioButton *flatButton = new QRadioButton(tr("Flat"), this);
+    QRadioButton *squareButton = new QRadioButton(tr("Square"), this);
+    QRadioButton *roundButton = new QRadioButton(tr("Round"), this);
+
+    capStyleG = new QButtonGroup(this);
+    capStyleG->addButton(flatButton, 0);
+    capStyleG->addButton(squareButton, 1);
+    capStyleG->addButton(roundButton, 2);
+
+    switch(capStyle)
+    {
+    case flat: flatButton->setChecked(true);       break;
+    case square: squareButton->setChecked(true);   break;
+    case round_cap: roundButton->setChecked(true); break;
+    default: break;
+    }
+
+    QHBoxLayout *hbox = new QHBoxLayout();
+    hbox->addWidget(flatButton);
+    hbox->addWidget(squareButton);
+    hbox->addWidget(roundButton);
+    capStyles->setLayout(hbox);
+
+    return capStyles;
+}
+
+/**
  * @brief LineDialog::LineSizeDialog - Dialogue selecting what kind of line to draw.
  */
 LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
@@ -84,9 +134,7 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
                                         int thickness)
     :QDialog(parent)
 {
-
     setWindowTitle(tr("Line Dialog"));
-    setAttribute(Qt::WA_DeleteOnClose, true);
 
     QGroupBox*left = new QGroupBox(this);
 
@@ -206,57 +254,6 @@ QGroupBox* LineDialog::createDrawType(DrawType drawType)
 }
 
 /**
- * @brief PenDialog::PenDialog - Dialogue for selecting pen size and cap style.
- *
- */
-PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
-    :QDialog(parent)
-{
-    setWindowTitle(tr("Pen Dialog"));
-    setAttribute(Qt::WA_DeleteOnClose, true);
-
-    QLabel *penSizeLabel = new QLabel(tr("Pen Size"), this);
-    penSizeSlider = new QSlider(Qt::Horizontal, this);
-    penSizeSlider->setMaximum(MAX_BRUSH_SIZE);
-    penSizeSlider->setSliderPosition(size);
-
-    QVBoxLayout *vbox = new QVBoxLayout(this);
-    vbox->addWidget(createCapStyle(capStyle));
-    vbox->addWidget(penSizeLabel);
-    vbox->addWidget(penSizeSlider);
-    setLayout(vbox);
-}
-
-QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
-{
-    QGroupBox *capStyles = new QGroupBox(tr("Cap Style"), this);
-    QRadioButton *flatButton = new QRadioButton(tr("Flat"), this);
-    QRadioButton *squareButton = new QRadioButton(tr("Square"), this);
-    QRadioButton *roundButton = new QRadioButton(tr("Round"), this);
-
-    capStyleG = new QButtonGroup(this);
-    capStyleG->addButton(flatButton, 0);
-    capStyleG->addButton(squareButton, 1);
-    capStyleG->addButton(roundButton, 2);
-
-    switch(capStyle)
-    {
-    case flat: flatButton->setChecked(true);       break;
-    case square: squareButton->setChecked(true);   break;
-    case round_cap: roundButton->setChecked(true); break;
-    default: break;
-    }
-
-    QHBoxLayout *hbox = new QHBoxLayout();
-    hbox->addWidget(flatButton);
-    hbox->addWidget(squareButton);
-    hbox->addWidget(roundButton);
-    capStyles->setLayout(hbox);
-
-    return capStyles;
-}
-
-/**
  * @brief EraserDialog::EraserDialog - Dialogue for choosing eraser thickness.
  *
  */
@@ -264,7 +261,6 @@ EraserDialog::EraserDialog(QWidget* parent, int thickness)
     :QDialog(parent)
 {
     setWindowTitle(tr("Eraser Dialog"));
-    setAttribute(Qt::WA_DeleteOnClose, true);
 
     QLabel *eraserThicknessLabel = new QLabel(tr("Eraser Thickness"), this);
     eraserThicknessSlider = new QSlider(Qt::Horizontal, this);
@@ -287,7 +283,6 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     :QDialog(parent)
 {
     setWindowTitle(tr("Rectangle Dialog"));
-    setAttribute(Qt::WA_DeleteOnClose, true);
 
     QGroupBox*left = new QGroupBox(this);
 

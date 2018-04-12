@@ -1,8 +1,9 @@
+#include <qpixmap.h>
+#include <QUndoCommand>
+
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
-#include <QUndoCommand>
-#include <qpixmap.h>
 
 class DrawCommand : public QUndoCommand
 {

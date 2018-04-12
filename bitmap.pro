@@ -5,7 +5,8 @@ HEADERS += \
 SOURCES += main.cpp \
     main_window.cpp \
     commands.cpp \
-    dialog_windows.cpp
+    dialog_windows.cpp \
+    toolbar.cpp
 CONFIG += qt warn_on
 CONFIG += debug
 QT = core gui

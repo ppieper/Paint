@@ -4,6 +4,7 @@
 #ifndef DIALOG_WINDOWS_H
 #define DIALOG_WINDOWS_H
 
+
 const int DEFAULT_WIDTH = 640;
 const int DEFAULT_HEIGHT = 480;
 
