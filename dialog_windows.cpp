@@ -1,6 +1,7 @@
 #include "dialog_windows.h"
+#include "main_window.h"
 
-const int MAX_BRUSH_SIZE = 500;
+const int MAX_BRUSH_SIZE = 50;
 
 /**
  * @brief CanvasSizeDialog::CanvasSizeDialog - Dialogue for creating a new canvas.
@@ -84,10 +85,14 @@ PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
 {
     setWindowTitle(tr("Pen Dialog"));
 
+    MainWindow* mainWindow = (MainWindow*)this->parent();
+
     QLabel *penSizeLabel = new QLabel(tr("Pen Size"), this);
     penSizeSlider = new QSlider(Qt::Horizontal, this);
     penSizeSlider->setMaximum(MAX_BRUSH_SIZE);
     penSizeSlider->setSliderPosition(size);
+    penSizeSlider->setTracking(false);
+    connect(penSizeSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnPenSizeConfig(int)));
 
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->addWidget(createCapStyle(capStyle));
@@ -103,10 +108,14 @@ QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
     QRadioButton *squareButton = new QRadioButton(tr("Square"), this);
     QRadioButton *roundButton = new QRadioButton(tr("Round"), this);
 
+    MainWindow* mainWindow = (MainWindow*)this->parent();
+
     capStyleG = new QButtonGroup(this);
     capStyleG->addButton(flatButton, 0);
     capStyleG->addButton(squareButton, 1);
     capStyleG->addButton(roundButton, 2);
+
+    connect(capStyleG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnPenCapConfig(int)));
 
     switch(capStyle)
     {
@@ -262,10 +271,14 @@ EraserDialog::EraserDialog(QWidget* parent, int thickness)
 {
     setWindowTitle(tr("Eraser Dialog"));
 
+    MainWindow* mainWindow = (MainWindow*)this->parent();
+
     QLabel *eraserThicknessLabel = new QLabel(tr("Eraser Thickness"), this);
     eraserThicknessSlider = new QSlider(Qt::Horizontal, this);
     eraserThicknessSlider->setMaximum(MAX_BRUSH_SIZE);
     eraserThicknessSlider->setSliderPosition(thickness);
+    eraserThicknessSlider->setTracking(false);
+    connect(eraserThicknessSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnEraserConfig(int)));
 
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->addWidget(eraserThicknessLabel);

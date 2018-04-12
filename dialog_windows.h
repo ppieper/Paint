@@ -68,7 +68,6 @@ class PenDialog : public QDialog
 
 public:
     PenDialog(QWidget* parent, CapStyle = round_cap, int size = 0);
-
 public slots:
 
 private:
