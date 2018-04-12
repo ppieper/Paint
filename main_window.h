@@ -1,10 +1,9 @@
-#include <QtWidgets>
-#include <QGraphicsScene>
-#include <QGraphicsView>
-#include <QGraphicsItem>
+#include "dialog_windows.h"
 
 #ifndef _MAIN_WINDOW_H
 #define _MAIN_WINDOW_H
+
+enum ToolType {pen, line, eraser, rect_tool};
 
 class ToolBar : public QToolBar
 {
@@ -34,6 +33,9 @@ class MainWindow: public QMainWindow {
 	/** paint handler */
 	void paintEvent(QPaintEvent *);
 
+    /** tool dialog dispatcher */
+    void openToolDialog();
+
 	public slots:
     void OnNewImage();
 	void OnLoadImage();
@@ -42,13 +44,22 @@ class MainWindow: public QMainWindow {
     void OnRedo();
     void OnClearAll();
     void OnResizeImage();
+    void OnChangeTool(int);
+    void OnPenDialog();
+    void OnLineDialog();
+    void OnEraserDialog();
+    void OnRectangleDialog();
     void OnPickColor(int);
 
 	private:
+    void saveCommand(QPixmap);
+
+    QUndoStack* undoStack;
 	QPixmap* image;
     ToolBar* toolbar;
-    QColor foregroundColor;
-    QColor backgroundColor;
+    QColor foregroundColor = Qt::white;
+    QColor backgroundColor = Qt::white;
+    ToolType currentTool;
 };
 
 #endif
