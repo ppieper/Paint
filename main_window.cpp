@@ -18,23 +18,32 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     // default tool
     currentTool = pen;
 
-    // create menu items
-    QMenu* file = new QMenu("File", this);
-    file->addAction("New image...", this, SLOT(OnNewImage()));
-    file->addAction("Load image...", this, SLOT(OnLoadImage()));
-    file->addAction("Save image...", this, SLOT(OnSaveImage()));
-    menuBar()->addMenu(file);
-    menuBar()->setNativeMenuBar(false);
-
     // create the toolbar
     toolbar = new ToolBar(this);
     addToolBar(toolbar);
+
+    // create the menu
+    createMenu();
+
+    //create the image
     image = new QPixmap();
+
+    // initialize tools
+    penTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::SquareCap);
+    lineTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::SquareCap);
+    eraserTool = new QPen(QBrush(Qt::white),10,Qt::SolidLine, Qt::SquareCap);
+    rectTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::SquareCap);
 
     // adjust window size, name, & stop context menu
     setWindowTitle(name);
     resize(QDesktopWidget().availableGeometry(this).size()*.6);
     setContextMenuPolicy(Qt::PreventContextMenu);
+
+    drawArea = new DrawArea(this, image, penTool, lineTool,
+                              eraserTool, rectTool);
+    drawArea->setStyleSheet("background-color:rgba(0,0,0,0)");
+    drawArea->setCurrentTool(currentTool);
+    setCentralWidget(drawArea);
 }
 
 MainWindow::~MainWindow()
@@ -42,13 +51,16 @@ MainWindow::~MainWindow()
     delete image;
 }
 
-void MainWindow::paintEvent(QPaintEvent* e)
+/**
+ * @brief MainWindow::mousePressEvent - On mouse right click, open dialog menu.
+ *
+ */
+
+void MainWindow::mousePressEvent(QMouseEvent *e)
 {
-	QPainter paint(this);
-	if (! image->isNull())
-	{
-        paint.drawPixmap(1, menuBar()->height() + TOOLBAR_HEIGHT, (*image));
-	}
+    if(e->button() == Qt::RightButton) {
+        openToolDialog();
+    }
 }
 
 /**
@@ -72,7 +84,7 @@ void MainWindow::OnNewImage()
         this->repaint();
 
         // for undo/redo
-        saveCommand(old_image);
+        saveDrawCommand(old_image);
     }
     // done with the dialog, free it
     delete newCanvas;
@@ -96,7 +108,7 @@ void MainWindow::OnLoadImage()
         this->repaint();
 
         // for undo/redo
-        saveCommand(old_image);
+        saveDrawCommand(old_image);
 	}
 }
 
@@ -129,7 +141,7 @@ void MainWindow::OnSaveImage()
             image->save(s, "BMP");
 
             // for undo/redo
-            saveCommand(old_image);
+            saveDrawCommand(old_image);
         }
     }
     // done with the dialog, free it
@@ -178,7 +190,7 @@ void MainWindow::OnClearAll()
     this->repaint();
 
     // for undo/redo
-    saveCommand(old_image);
+    saveDrawCommand(old_image);
 }
 
 /**
@@ -190,7 +202,7 @@ void MainWindow::OnResizeImage()
     if(image->isNull())
         return;
 
-    CanvasSizeDialog* newCanvas = new CanvasSizeDialog(this, "Resize Canvas",
+    CanvasSizeDialog* newCanvas = new CanvasSizeDialog(this, "Resize Image",
                                                        image->width(), image->height());
     newCanvas->exec();
     // if user hit 'OK' button, create new image
@@ -199,14 +211,20 @@ void MainWindow::OnResizeImage()
         // save a copy of the old image
         QPixmap old_image = image->copy(QRect());
 
-        // re-scale the image
+        // get new dimension from dialog
         int width = newCanvas->getWidthValue();
         int height = newCanvas->getHeightValue();
+
+        // no change
+        if(image->size() == QSize(width, height))
+            return;
+
+        // re-scale the image
         *image = image->scaled(QSize(width,height), Qt::IgnoreAspectRatio);
         this->repaint();
 
         // for undo/redo
-        saveCommand(old_image);
+        saveDrawCommand(old_image);
     }
     // done with the dialog, free it
     delete newCanvas;
@@ -230,9 +248,17 @@ void MainWindow::OnPickColor(int which)
     if (aColor.isValid())
     {
        if(which == foreground)
-           foregroundColor = aColor;
+       {
+            foregroundColor = aColor;
+            penTool->setColor(foregroundColor);
+            lineTool->setColor(foregroundColor);
+            rectTool->setColor(foregroundColor);
+       }
        else
+       {
            backgroundColor = aColor;
+           eraserTool->setColor(backgroundColor);
+       }
     }
     // done with the dialog, free it
     delete colorDialog;
@@ -245,6 +271,7 @@ void MainWindow::OnPickColor(int which)
 void MainWindow::OnChangeTool(int newTool)
 {
     currentTool = (ToolType) newTool;
+    drawArea->setCurrentTool(currentTool); // notify observer
 }
 
 /**
@@ -253,10 +280,13 @@ void MainWindow::OnChangeTool(int newTool)
  */
 void MainWindow::OnPenDialog()
 {
-    PenDialog *penDialog = new PenDialog(this);
-    penDialog->exec();
+    if(!penDialog)
+        penDialog = new PenDialog(this);
 
-    delete penDialog;
+    if(penDialog && penDialog->isVisible())
+        return;
+
+    penDialog->show();
 }
 
 /**
@@ -265,10 +295,13 @@ void MainWindow::OnPenDialog()
  */
 void MainWindow::OnLineDialog()
 {
-    LineDialog *lineDialog = new LineDialog(this);
-    lineDialog->exec();
+    if(!lineDialog)
+        lineDialog = new LineDialog(this);
 
-    delete lineDialog;
+    if(lineDialog && lineDialog->isVisible())
+        return;
+
+    lineDialog->show();
 }
 
 /**
@@ -277,10 +310,13 @@ void MainWindow::OnLineDialog()
  */
 void MainWindow::OnEraserDialog()
 {
-    EraserDialog *eraserDialog = new EraserDialog(this);
-    eraserDialog->exec();
+    if (!eraserDialog)
+        eraserDialog = new EraserDialog(this);
 
-    delete eraserDialog;
+    if(eraserDialog->isVisible())
+        return;
+
+    eraserDialog->show();
 }
 
 /**
@@ -289,10 +325,73 @@ void MainWindow::OnEraserDialog()
  */
 void MainWindow::OnRectangleDialog()
 {
-    RectDialog *rectDialog = new RectDialog(this);
-    rectDialog->exec();
+    if (!rectDialog)
+        rectDialog = new RectDialog(this);
 
-    delete rectDialog;
+    if(rectDialog->isVisible())
+        return;
+
+    rectDialog->show();
+}
+
+void MainWindow::OnPenCapConfig(int capStyle)
+{
+    switch (capStyle)
+    {
+    case flat: penTool->setCapStyle(Qt::FlatCap);       break;
+    case square: penTool->setCapStyle(Qt::SquareCap);   break;
+    case round_cap: penTool->setCapStyle(Qt::RoundCap); break;
+    default:                                            break;
+    }
+}
+
+void MainWindow::OnPenSizeConfig(int value)
+{
+    penTool->setWidth(value);
+}
+
+void MainWindow::OnEraserConfig(int value)
+{
+    eraserTool->setWidth(value);
+}
+
+void MainWindow::OnLineStyleConfig(int capStyle)
+{
+    switch (capStyle)
+    {
+    case solid: lineTool->setStyle(Qt::SolidLine);                break;
+    case dashed: lineTool->setStyle(Qt::DashLine);                break;
+    case dotted: lineTool->setStyle(Qt::DotLine);                 break;
+    case dash_dotted: lineTool->setStyle(Qt::DashDotLine);        break;
+    case dash_dot_dotted: lineTool->setStyle(Qt::DashDotDotLine); break;
+    default:                                                     break;
+    }
+}
+
+void MainWindow::OnLineCapConfig(int capStyle)
+{
+    switch (capStyle)
+    {
+    case flat: lineTool->setCapStyle(Qt::FlatCap);       break;
+    case square: lineTool->setCapStyle(Qt::SquareCap);   break;
+    case round_cap: lineTool->setCapStyle(Qt::RoundCap); break;
+    default:                                             break;
+    }
+}
+
+void MainWindow::OnDrawTypeConfig(int drawType)
+{
+    switch (drawType)
+    {
+    case single: drawArea->setLineMode(single); break;
+    case poly:   drawArea->setLineMode(poly);   break;
+    default:     break;
+    }
+}
+
+void MainWindow::OnLineThicknessConfig(int value)
+{
+    lineTool->setWidth(value);
 }
 
 /**
@@ -311,27 +410,11 @@ void MainWindow::openToolDialog()
 }
 
 /**
- * @brief MainWindow::mousePressEvent - On mouse click, draw or open dialog menu.
- *
- */
-void MainWindow::mousePressEvent(QMouseEvent *e)
-{
-    if(e->button() == Qt::LeftButton) {
-        if(image->isNull())
-            return;
-        // use tools
-    }
-    else if(e->button() == Qt::RightButton) {
-        openToolDialog();
-    }
-}
-
-/**
- * @brief MainWindow::SaveCommand - Put together a DrawCommand
+ * @brief MainWindow::SaveDrawCommand - Put together a DrawCommand
  *                                  and save it on the undo/redo stack.
  *
  */
-void MainWindow::saveCommand(QPixmap old_image)
+void MainWindow::saveDrawCommand(QPixmap old_image)
 {
     // put the old and new image on the stack for undo/redo
     QUndoCommand *drawCommand = new DrawCommand(old_image, image);
@@ -339,122 +422,62 @@ void MainWindow::saveCommand(QPixmap old_image)
 }
 
 /**
- * @brief ToolBar::ToolBar - Wrapper class for QToolBar.
- *                           construct a ToolBar with icons & actions.
+ * @brief MainWindow::createMenu - create and return a menu
+ *
  */
-ToolBar::ToolBar(QWidget *parent)
-    : QToolBar(parent)
+void MainWindow::createMenu()
 {
-    // make sure we can't move or hide the toolbar
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    setContextMenuPolicy(Qt::PreventContextMenu);
-    setMovable(false);
-    createActions();
-}
+    // File
+    QMenu* file = new QMenu("File", this);
+    file->addAction("New image...", this, SLOT(OnNewImage()), tr("Ctrl+N"));
+    file->addAction("Load image...", this, SLOT(OnLoadImage()), tr("Ctrl+O"));
+    file->addAction("Save image...", this, SLOT(OnSaveImage()), tr("Ctrl+S"));
+    file->addAction("Quit", this, SLOT(close()), tr("Ctrl+Q"));
 
-/**
- * @brief ToolBar::createActions - Create the toolbar actions and
- *                                 give each one an icon.
- */
-void ToolBar::createActions()
-{
-    // load button icons from files
-    QIcon new_icon("icons/new_icon.png");
-    QIcon open_icon("icons/open_icon.png");
-    QIcon save_icon("icons/save_icon.png");
-    QIcon undo_icon("icons/undo_icon.png");
-    QIcon redo_icon("icons/redo_icon.png");
-    QIcon clear_icon("icons/clearall_icon.png");
-    QIcon resize_icon("icons/resize_icon.png");
-    QIcon fcolor_icon("icons/fcolor_icon.png");
-    QIcon bcolor_icon("icons/bcolor_icon.png");
-    QIcon pen_icon("icons/pen_icon.png");
-    QIcon line_icon("icons/line_icon.png");
-    QIcon eraser_icon("icons/eraser_icon.png");
-    QIcon rect_icon("icons/rect_icon.png");
+    // Edit
+    QMenu* edit = new QMenu("Edit", this);
+    edit->addAction("Undo", this, SLOT(OnUndo()), tr("Ctrl+Z"));
+    edit->addAction("Redo", this, SLOT(OnRedo()), tr("Ctrl+Y"));
+    edit->addAction("Clear Canvas", this, SLOT(OnClearAll()), tr("Ctrl+C"));
+    edit->addAction("Resize Image...", this, SLOT(OnResizeImage()), tr("Ctrl+R"));
 
-    MainWindow* mainWindow = (MainWindow*)this->parent();
+    // color pickers (still under Edit)
+    QSignalMapper *signalMapper = new QSignalMapper(this);
 
-    // create the actions for each button
-    QAction *new_action = new QAction(new_icon, "New File", this);
-    new_action->setShortcut(tr("Ctrl+N"));
-    connect(new_action, &QAction::triggered, mainWindow, &MainWindow::OnNewImage);
-
-    QAction *open_action = new QAction(open_icon, "Open File", this);
-    open_action->setShortcut(tr("Ctrl+O"));
-    connect(open_action, &QAction::triggered, mainWindow, &MainWindow::OnLoadImage);
-
-    QAction *save_action = new QAction(save_icon, "Save File", this);
-    save_action->setShortcut(tr("Ctrl+S"));
-    connect(save_action, &QAction::triggered, mainWindow, &MainWindow::OnSaveImage);
-
-    QAction *clear_action = new QAction(clear_icon, "Clear", this);
-    clear_action->setShortcut(tr("Ctrl+C"));
-    connect(clear_action, &QAction::triggered, mainWindow, &MainWindow::OnClearAll);
-
-    QAction *resize_action = new QAction(resize_icon, "Resize", this);
-    resize_action->setShortcut(tr("Ctrl+R"));
-    connect(resize_action, &QAction::triggered, mainWindow, &MainWindow::OnResizeImage);
-
-    QAction *undo_action = new QAction(undo_icon, "Undo", this);
-    undo_action->setShortcut(tr("Ctrl+Z"));
-    connect(undo_action, &QAction::triggered, mainWindow, &MainWindow::OnUndo);
-
-    QAction *redo_action = new QAction(redo_icon, "Redo", this);
-    redo_action->setShortcut(tr("Ctrl+Y"));
-    connect(redo_action, &QAction::triggered, mainWindow, &MainWindow::OnRedo);
-
-    // color pickers
-    QSignalMapper *signalMapperC = new QSignalMapper(this);
-
-    QAction *fcolor_action = new QAction(fcolor_icon, "Foreground Color", this);
+    QAction *fcolor_action = new QAction("Foreground Color...", this);
+    connect(fcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
     fcolor_action->setShortcut(tr("Ctrl+F"));
-    connect(fcolor_action, SIGNAL(triggered()), signalMapperC, SLOT(map()));
-    QAction *bcolor_action = new QAction(bcolor_icon, "Background Color", this);
+
+    QAction *bcolor_action = new QAction("Background Color...", this);
+    connect(bcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
     bcolor_action->setShortcut(tr("Ctrl+B"));
-    connect(bcolor_action, SIGNAL(triggered()), signalMapperC, SLOT(map()));
 
-    signalMapperC->setMapping(fcolor_action, foreground);
-    signalMapperC->setMapping(bcolor_action, background);
+    signalMapper->setMapping(fcolor_action, foreground);
+    signalMapper->setMapping(bcolor_action, background);
 
-    connect(signalMapperC, SIGNAL(mapped(int)), mainWindow, SLOT(OnPickColor(int)));
+    connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(OnPickColor(int)));
 
-    // tool pickers
-    QSignalMapper *signalMapperT = new QSignalMapper(this);
+    edit->addAction(fcolor_action);
+    edit->addAction(bcolor_action);
 
-    QAction *pen_action = new QAction(pen_icon, "Pen Tool", this);
-    connect(pen_action, SIGNAL(triggered()), signalMapperT, SLOT(map()));
+    // Tools
+    QMenu* tools = new QMenu("Tools", this);
+    tools->addAction("Pen Properties...", this, SLOT(OnPenDialog()));
+    tools->addAction("Line Properties...", this, SLOT(OnLineDialog()));
+    tools->addAction("Eraser Properties...", this, SLOT(OnEraserDialog()));
+    tools->addAction("Rectangle Properties...", this, SLOT(OnRectangleDialog()));
 
-    QAction *line_action = new QAction(line_icon, "Line Tool", this);
-    connect(line_action, SIGNAL(triggered()), signalMapperT, SLOT(map()));
+    // View
+    QMenu* view = new QMenu("View", this);
+    QAction *toggleToolbar = toolbar->toggleViewAction();
+    toggleToolbar->setText("Show Toolbar");
+    toggleToolbar->setShortcut(tr("Ctrl+T"));
 
-    QAction *eraser_action = new QAction(eraser_icon, "Eraser", this);
-    connect(eraser_action, SIGNAL(triggered()), signalMapperT, SLOT(map()));
+    view->addAction(toggleToolbar);
 
-    QAction *rect_action = new QAction(rect_icon, "Rectangle Tool", this);
-    connect(rect_action, SIGNAL(triggered()), signalMapperT, SLOT(map()));
-
-    signalMapperT->setMapping(pen_action, pen);
-    signalMapperT->setMapping(line_action, line);
-    signalMapperT->setMapping(eraser_action, eraser);
-    signalMapperT->setMapping(rect_action, rect_tool);
-
-    connect(signalMapperT, SIGNAL(mapped(int)), mainWindow, SLOT(OnChangeTool(int)));
-
-    // add the actions
-    this->addAction(new_action);
-    this->addAction(open_action);
-    this->addAction(save_action);
-    this->addAction(undo_action);
-    this->addAction(redo_action);
-    this->addAction(clear_action);
-    this->addAction(resize_action);
-    this->addAction(fcolor_action);
-    this->addAction(bcolor_action);
-    this->addSeparator();
-    this->addAction(pen_action);
-    this->addAction(line_action);
-    this->addAction(eraser_action);
-    this->addAction(rect_action);
+    menuBar()->addMenu(file);
+    menuBar()->addMenu(edit);
+    menuBar()->addMenu(tools);
+    menuBar()->addMenu(view);
+    menuBar()->setNativeMenuBar(false);
 }
-

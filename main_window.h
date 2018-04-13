@@ -1,42 +1,37 @@
-#include "dialog_windows.h"
-
 #ifndef _MAIN_WINDOW_H
 #define _MAIN_WINDOW_H
 
-enum ToolType {pen, line, eraser, rect_tool};
+#include "dialog_windows.h"
+#include "draw_area.h"
+
 
 class ToolBar : public QToolBar
 {
-    Q_OBJECT
-
 public:
     ToolBar(QWidget* parent);
-
-public slots:
 
 private:
     void createActions();
 };
 
 class MainWindow: public QMainWindow {
-	// All classes that contain signals or slots
-	// must mention Q_OBJECT in their declaration.
+
 	Q_OBJECT
 
 	public:
+
     MainWindow(QWidget* parent = 0, const char* name = 0);
     ~MainWindow();
 
-	/** mouse event handler */
-	void mousePressEvent (QMouseEvent *);
+    /** mouse event handler */
+    void mousePressEvent (QMouseEvent *);
 
-	/** paint handler */
-	void paintEvent(QPaintEvent *);
-
-    /** tool dialog dispatcher */
-    void openToolDialog();
+    /** save a command to the undo stack */
+    void saveDrawCommand(QPixmap);
 
 	public slots:
+
+    /** toolbar actions */
     void OnNewImage();
 	void OnLoadImage();
     void OnSaveImage();
@@ -44,22 +39,59 @@ class MainWindow: public QMainWindow {
     void OnRedo();
     void OnClearAll();
     void OnResizeImage();
+    void OnPickColor(int);
     void OnChangeTool(int);
+    /** tool dialogs */
     void OnPenDialog();
     void OnLineDialog();
     void OnEraserDialog();
     void OnRectangleDialog();
-    void OnPickColor(int);
+    /** pen tool */
+    void OnPenCapConfig(int);
+    void OnPenSizeConfig(int);
+    /** eraser tool */
+    void OnEraserConfig(int);
+    /** line tool */
+    void OnLineStyleConfig(int);
+    void OnLineCapConfig(int);
+    void OnDrawTypeConfig(int);
+    void OnLineThicknessConfig(int);
 
 	private:
-    void saveCommand(QPixmap);
 
+    /** tool dialog dispatcher */
+    void openToolDialog();
+
+    void createMenu();
+
+    /** undo stack */
     QUndoStack* undoStack;
-	QPixmap* image;
+
+    /** the paintArea */
+    DrawArea* drawArea;
+
+    /** Main toolbar */
     ToolBar* toolbar;
+
+    /** the image */
+    QPixmap* image;
+
+    /** background/foreground color */
     QColor foregroundColor = Qt::white;
     QColor backgroundColor = Qt::white;
+
+    /** tools */
     ToolType currentTool;
+    QPen* penTool;
+    QPen* lineTool;
+    QPen* eraserTool;
+    QPen* rectTool;
+
+    /** dialog pointers - init to 0 */
+    PenDialog* penDialog = 0;
+    LineDialog* lineDialog = 0;
+    EraserDialog* eraserDialog = 0;
+    RectDialog* rectDialog = 0;
 };
 
 #endif
