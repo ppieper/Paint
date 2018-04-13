@@ -1,6 +1,7 @@
 #include "dialog_windows.h"
 #include "main_window.h"
 
+const int MIN_BRUSH_SIZE = 1;
 const int MAX_BRUSH_SIZE = 50;
 
 /**
@@ -89,6 +90,7 @@ PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
 
     QLabel *penSizeLabel = new QLabel(tr("Pen Size"), this);
     penSizeSlider = new QSlider(Qt::Horizontal, this);
+    penSizeSlider->setMinimum(MIN_BRUSH_SIZE);
     penSizeSlider->setMaximum(MAX_BRUSH_SIZE);
     penSizeSlider->setSliderPosition(size);
     penSizeSlider->setTracking(false);
@@ -160,6 +162,7 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
 
     QLabel *lineThicknessLabel = new QLabel(tr("Line Thickness"), this);
     lineThicknessSlider = new QSlider(Qt::Horizontal, this);
+    lineThicknessSlider->setMinimum(MIN_BRUSH_SIZE);
     lineThicknessSlider->setMaximum(MAX_BRUSH_SIZE);
     lineThicknessSlider->setSliderPosition(thickness);
 
@@ -275,6 +278,7 @@ EraserDialog::EraserDialog(QWidget* parent, int thickness)
 
     QLabel *eraserThicknessLabel = new QLabel(tr("Eraser Thickness"), this);
     eraserThicknessSlider = new QSlider(Qt::Horizontal, this);
+    eraserThicknessSlider->setMinimum(MIN_BRUSH_SIZE);
     eraserThicknessSlider->setMaximum(MAX_BRUSH_SIZE);
     eraserThicknessSlider->setSliderPosition(thickness);
     eraserThicknessSlider->setTracking(false);
@@ -313,11 +317,13 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
 
     QLabel *lineThicknessLabel = new QLabel(tr("Line Thickness"), this);
     lineThicknessSlider = new QSlider(Qt::Horizontal, this);
+    lineThicknessSlider->setMinimum(MIN_BRUSH_SIZE);
     lineThicknessSlider->setMaximum(MAX_BRUSH_SIZE);
     lineThicknessSlider->setSliderPosition(thickness);
 
     QLabel *rRectCurveLabel = new QLabel(tr("Rounded Rectangle Curve"), this);
     rRectCurveSlider = new QSlider(Qt::Horizontal, this);
+    rRectCurveSlider->setMinimum(MIN_BRUSH_SIZE);
     rRectCurveSlider->setMaximum(MAX_BRUSH_SIZE);
     rRectCurveSlider->setSliderPosition(curve);
 

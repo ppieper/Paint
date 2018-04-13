@@ -30,12 +30,17 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
 
     // initialize tools
     penTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::SquareCap);
-    eraserTool = new QPen(QBrush(Qt::white),1,Qt::SolidLine, Qt::SquareCap);
+    eraserTool = new QPen(QBrush(Qt::white),10,Qt::SolidLine, Qt::SquareCap);
 
     // adjust window size, name, & stop context menu
     setWindowTitle(name);
     resize(QDesktopWidget().availableGeometry(this).size()*.6);
     setContextMenuPolicy(Qt::PreventContextMenu);
+
+    drawArea = new DrawArea(this, image, penTool, lineTool,
+                              eraserTool, rectTool);
+    drawArea->setStyleSheet("background-color:rgba(0,0,0,0)");
+    setCentralWidget(drawArea);
 }
 
 MainWindow::~MainWindow()
@@ -43,90 +48,15 @@ MainWindow::~MainWindow()
     delete image;
 }
 
-void MainWindow::paintEvent(QPaintEvent* e)
-{
-    QPainter paint(this);
-    if (! image->isNull())
-    {
-       /* QRect paintedArea = paint.matrix().inverted()
-                .mapRect(e->rect())
-                .adjusted(-1, -1, 1, 1);*/
-        //paint.drawPixmap(paintedArea, *image, paintedArea);
-        paint.drawPixmap(1, menuBar()->height() + TOOLBAR_HEIGHT, (*image));
-    }
-}
-
 /**
- * @brief MainWindow::mousePressEvent - On mouse click, draw or open dialog menu.
+ * @brief MainWindow::mousePressEvent - On mouse right click, open dialog menu.
  *
  */
+
 void MainWindow::mousePressEvent(QMouseEvent *e)
 {
-    if(e->button() == Qt::LeftButton) {
-        if(image->isNull())
-            return;
-
-        // save a copy of the old image
-        old_image = image->copy(QRect());
-    }
-    else if(e->button() == Qt::RightButton) {
+    if(e->button() == Qt::RightButton) {
         openToolDialog();
-    }
-}
-
-void MainWindow::mouseMoveEvent(QMouseEvent *e)
-{
-    if(e->buttons() == Qt::LeftButton) {
-        if(image->isNull())
-            return;
-
-        QPoint pos = e->pos();
-        pos.setY(pos.y() - menuBar()->height() - TOOLBAR_HEIGHT);
-        old_pos = pos;
-        draw(pos);
-    }
-}
-
-void MainWindow::mouseReleaseEvent(QMouseEvent *e)
-{
-    if(e->button() == Qt::LeftButton) {
-        if(image->isNull())
-            return;
-
-        // for undo/redo
-        saveCommand();
-    }
-}
-
-void MainWindow::draw(const QPoint& pos)
-{
-    switch(currentTool)
-    {
-        case pen:
-        {
-            QPainter painter(image);
-            painter.setPen(*penTool);
-            painter.drawLine(old_pos, pos);
-            old_pos = pos;
-            repaint();
-            //int rad = (penTool->width() / 2) + 2;
-            //update(QRect(old_pos, pos).normalized().adjusted(-rad, -rad, +rad, +rad));
-        } break;
-        case line:
-        {
-        } break;
-        case eraser:
-        {
-            QPainter painter(image);
-            painter.setRenderHint(QPainter::Antialiasing);
-            painter.setPen(*eraserTool);
-            painter.drawPoint(pos);
-            repaint();
-        } break;
-        case rect_tool:
-            {
-            } break;
-        default: break;
     }
 }
 
@@ -142,7 +72,7 @@ void MainWindow::OnNewImage()
     if (newCanvas->result())
     {
         // save a copy of the old image
-        old_image = image->copy(QRect());
+        QPixmap old_image = image->copy(QRect());
 
         int width = newCanvas->getWidthValue();
         int height = newCanvas->getHeightValue();
@@ -151,7 +81,7 @@ void MainWindow::OnNewImage()
         this->repaint();
 
         // for undo/redo
-        saveCommand();
+        saveDrawCommand(old_image);
     }
     // done with the dialog, free it
     delete newCanvas;
@@ -169,13 +99,13 @@ void MainWindow::OnLoadImage()
 	if (! s.isNull())
 	{
         // save a copy of the old image
-        old_image = image->copy(QRect());
+        QPixmap old_image = image->copy(QRect());
 
 		image->load(s);
         this->repaint();
 
         // for undo/redo
-        saveCommand();
+        saveDrawCommand(old_image);
 	}
 }
 
@@ -203,12 +133,12 @@ void MainWindow::OnSaveImage()
         if (! s.isNull())
         {
             // save a copy of the old image
-            old_image = image->copy(QRect());
+            QPixmap old_image = image->copy(QRect());
 
             image->save(s, "BMP");
 
             // for undo/redo
-            saveCommand();
+            saveDrawCommand(old_image);
         }
     }
     // done with the dialog, free it
@@ -251,13 +181,13 @@ void MainWindow::OnClearAll()
         return;
 
     // save a copy of the old image
-    old_image = image->copy(QRect());
+    QPixmap old_image = image->copy(QRect());
 
     image->fill(); // default is white
     this->repaint();
 
     // for undo/redo
-    saveCommand();
+    saveDrawCommand(old_image);
 }
 
 /**
@@ -276,7 +206,7 @@ void MainWindow::OnResizeImage()
     if (newCanvas->result())
     {
         // save a copy of the old image
-        old_image = image->copy(QRect());
+        QPixmap old_image = image->copy(QRect());
 
         // get new dimension from dialog
         int width = newCanvas->getWidthValue();
@@ -291,7 +221,7 @@ void MainWindow::OnResizeImage()
         this->repaint();
 
         // for undo/redo
-        saveCommand();
+        saveDrawCommand(old_image);
     }
     // done with the dialog, free it
     delete newCanvas;
@@ -315,7 +245,10 @@ void MainWindow::OnPickColor(int which)
     if (aColor.isValid())
     {
        if(which == foreground)
+       {
            foregroundColor = aColor;
+           penTool->setColor(foregroundColor);
+       }
        else
            backgroundColor = aColor;
     }
@@ -330,6 +263,7 @@ void MainWindow::OnPickColor(int which)
 void MainWindow::OnChangeTool(int newTool)
 {
     currentTool = (ToolType) newTool;
+    drawArea->setCurrentTool(currentTool); // notify observer
 }
 
 /**
@@ -429,11 +363,11 @@ void MainWindow::openToolDialog()
 }
 
 /**
- * @brief MainWindow::SaveCommand - Put together a DrawCommand
+ * @brief MainWindow::SaveDrawCommand - Put together a DrawCommand
  *                                  and save it on the undo/redo stack.
  *
  */
-void MainWindow::saveCommand()
+void MainWindow::saveDrawCommand(QPixmap old_image)
 {
     // put the old and new image on the stack for undo/redo
     QUndoCommand *drawCommand = new DrawCommand(old_image, image);
