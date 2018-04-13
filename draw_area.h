@@ -1,10 +1,11 @@
-#ifndef PAINT_AREA_H
-#define PAINT_AREA_H
-
-#include "dialog_windows.h"
+#ifndef DRAW_AREA_H
+#define DRAW_AREA_H
 
 
-enum ToolType {pen, line, eraser, rect_tool};
+#include "constants.h"
+
+class Tool;
+class MainWindow;
 
 class DrawArea : public QWidget
 {
@@ -12,18 +13,18 @@ public:
     DrawArea(QWidget *parent, QPixmap *image, QPen *pen,
               QPen *line, QPen *eraser, QPen *rect);
 
-    void setCurrentTool(const ToolType tool);
+    void setCurrentTool(Tool* tool);
     void setLineMode(const DrawType mode);
 
 protected:
     /** mouse event handler */
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void virtual mousePressEvent(QMouseEvent *event) override;
+    void virtual mouseMoveEvent(QMouseEvent *event) override;
+    void virtual mouseReleaseEvent(QMouseEvent *event) override;
+    void virtual mouseDoubleClickEvent(QMouseEvent *event) override;
 
     /** paint event handler */
-    void paintEvent(QPaintEvent *event) override;
+    void virtual paintEvent(QPaintEvent *event) override;
 
 private:
     void drawTo(const QPoint &endPoint);
@@ -33,7 +34,7 @@ private:
     MainWindow* mainWindow;
 
     /** tools */
-    ToolType currentTool;
+    Tool* currentTool;
     DrawType currentLineMode;
 
     QPen* penTool;
@@ -43,7 +44,7 @@ private:
 
     QPixmap* image;
     QPixmap oldImage;
-    QPoint startPoint;
+
     bool drawing;
     bool drawingPoly;
 };

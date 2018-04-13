@@ -1,9 +1,8 @@
-#ifndef _MAIN_WINDOW_H
-#define _MAIN_WINDOW_H
+#ifndef MAIN_WINDOW_H
+#define MAIN_WINDOW_H
 
 #include "dialog_windows.h"
 #include "toolbar.h"
-#include "draw_area.h"
 
 
 class MainWindow: public QMainWindow {
@@ -16,7 +15,7 @@ class MainWindow: public QMainWindow {
     ~MainWindow();
 
     /** mouse event handler */
-    void mousePressEvent (QMouseEvent *);
+    void virtual mousePressEvent (QMouseEvent *) override;
 
     /** save a command to the undo stack */
     void saveDrawCommand(QPixmap);
@@ -49,6 +48,14 @@ class MainWindow: public QMainWindow {
     void OnDrawTypeConfig(int);
     void OnLineThicknessConfig(int);
 
+    /** rect tool */
+    void OnRectBStyleConfig(int);
+    void OnRectShapeTypeConfig(int);
+    void OnRectFillConfig(int);
+    void OnRectBTypeConfig(int);
+    void OnRectLineConfig(int);
+    void OnRectCurveConfig(int);
+
 	private:
 
     /** tool dialog dispatcher */
@@ -69,15 +76,15 @@ class MainWindow: public QMainWindow {
     QPixmap* image;
 
     /** background/foreground color */
-    QColor foregroundColor = Qt::white;
-    QColor backgroundColor = Qt::white;
+    QColor foregroundColor;
+    QColor backgroundColor;
 
     /** tools */
-    ToolType currentTool;
-    QPen* penTool;
-    QPen* lineTool;
-    QPen* eraserTool;
-    QPen* rectTool;
+    Tool* currentTool;
+    PenTool* penTool;
+    LineTool* lineTool;
+    EraserTool* eraserTool;
+    RectTool* rectTool;
 
     /** dialog pointers - init to 0 */
     PenDialog* penDialog = 0;

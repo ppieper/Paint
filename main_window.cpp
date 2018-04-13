@@ -3,6 +3,7 @@ using namespace std;
 
 #include "main_window.h"
 #include "commands.h"
+#include "draw_area.h"
 
 
 /**
@@ -14,9 +15,6 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     // initialize the undo stack
     undoStack = new QUndoStack(this);
 
-    // default tool
-    currentTool = pen;
-
     // create the toolbar
     toolbar = new ToolBar(this);
     addToolBar(toolbar);
@@ -27,11 +25,18 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     //create the image
     image = new QPixmap();
 
+    // initialize colors
+    foregroundColor = Qt::black;
+    backgroundColor = Qt::white;
+
     // initialize tools
-    penTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::RoundCap);
-    lineTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::RoundCap);
-    eraserTool = new QPen(QBrush(Qt::white),10,Qt::SolidLine, Qt::RoundCap);
-    rectTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::RoundCap);
+    penTool = new PenTool(QBrush(Qt::black),1,Qt::SolidLine, image, Qt::RoundCap);
+    lineTool = new LineTool(QBrush(Qt::black),1,Qt::SolidLine, image, Qt::RoundCap);
+    eraserTool = new EraserTool(QBrush(Qt::white),10,Qt::SolidLine, image, Qt::RoundCap);
+    rectTool = new RectTool(QBrush(Qt::black),1,Qt::SolidLine, image, Qt::RoundCap);
+
+    // default tool
+    currentTool = penTool;
 
     // adjust window size, name, & stop context menu
     setWindowTitle(name);
@@ -84,7 +89,7 @@ void MainWindow::OnNewImage()
         int height = newCanvas->getHeightValue();
         *image = QPixmap(QSize(width,height));
         image->fill(backgroundColor);
-        drawArea->update(image->rect());
+        drawArea->update();
 
         // for undo/redo
         saveDrawCommand(old_image);
@@ -108,7 +113,7 @@ void MainWindow::OnLoadImage()
         QPixmap old_image = image->copy(QRect());
 
 		image->load(s);
-        drawArea->update(image->rect());
+        drawArea->update();
 
         // for undo/redo
         saveDrawCommand(old_image);
@@ -263,12 +268,15 @@ void MainWindow::OnPickColor(int which)
             foregroundColor = aColor;
             penTool->setColor(foregroundColor);
             lineTool->setColor(foregroundColor);
-            rectTool->setColor(foregroundColor);
+            if(rectTool->getFillMode() == foreground)
+                rectTool->setFillColor(foregroundColor);
        }
        else
        {
            backgroundColor = aColor;
            eraserTool->setColor(backgroundColor);
+           if(rectTool->getFillMode() == background)
+               rectTool->setFillColor(backgroundColor);
        }
     }
     // done with the dialog, free it
@@ -281,7 +289,14 @@ void MainWindow::OnPickColor(int which)
  */
 void MainWindow::OnChangeTool(int newTool)
 {
-    currentTool = (ToolType) newTool;
+    switch(newTool)
+    {
+        case pen: currentTool = penTool;         break;
+        case line: currentTool = lineTool;      break;
+        case eraser: currentTool = eraserTool;  break;
+        case rect_tool: currentTool = rectTool; break;
+        default: break;
+    }
     drawArea->setCurrentTool(currentTool); // notify observer
 }
 
@@ -366,9 +381,9 @@ void MainWindow::OnEraserConfig(int value)
     eraserTool->setWidth(value);
 }
 
-void MainWindow::OnLineStyleConfig(int capStyle)
+void MainWindow::OnLineStyleConfig(int lineStyle)
 {
-    switch (capStyle)
+    switch (lineStyle)
     {
         case solid: lineTool->setStyle(Qt::SolidLine);                break;
         case dashed: lineTool->setStyle(Qt::DashLine);                break;
@@ -405,13 +420,72 @@ void MainWindow::OnLineThicknessConfig(int value)
     lineTool->setWidth(value);
 }
 
+void MainWindow::OnRectBStyleConfig(int boundaryStyle)
+{
+    switch (boundaryStyle)
+    {
+        case solid: rectTool->setStyle(Qt::SolidLine);                break;
+        case dashed: rectTool->setStyle(Qt::DashLine);                break;
+        case dotted: rectTool->setStyle(Qt::DotLine);                 break;
+        case dash_dotted: rectTool->setStyle(Qt::DashDotLine);        break;
+        case dash_dot_dotted: rectTool->setStyle(Qt::DashDotDotLine); break;
+        default:                                                      break;
+    }
+}
+
+void MainWindow::OnRectShapeTypeConfig(int shape)
+{
+    switch (shape)
+    {
+        case rectangle: rectTool->setShapeType(rectangle);                 break;
+        case rounded_rectangle: rectTool->setShapeType(rounded_rectangle); break;
+        case ellipse: rectTool->setShapeType(ellipse);                     break;
+        default:                                                           break;
+    }
+}
+
+void MainWindow::OnRectFillConfig(int fillType)
+{
+    switch (fillType)
+    {
+        case foreground: rectTool->setFillMode(foreground);
+                         rectTool->setFillColor(foregroundColor);      break;
+        case background: rectTool->setFillMode(background);
+                         rectTool->setFillColor(backgroundColor);      break;
+        case no_fill: rectTool->setFillMode(no_fill);
+                      rectTool->setFillColor(QColor(Qt::transparent)); break;
+        default:                                                       break;
+    }
+}
+
+void MainWindow::OnRectBTypeConfig(int boundaryType)
+{
+    switch (boundaryType)
+    {
+        case miter_join: rectTool->setJoinStyle(Qt::MiterJoin);  break;
+        case bevel_join: rectTool->setJoinStyle(Qt::BevelJoin);  break;
+        case round_join: rectTool->setJoinStyle(Qt::RoundJoin);  break;
+        default:                                                 break;
+    }
+}
+
+void MainWindow::OnRectLineConfig(int value)
+{
+    rectTool->setWidth(value);
+}
+
+void MainWindow::OnRectCurveConfig(int value)
+{
+    rectTool->setCurve(value);
+}
+
 /**
  * @brief MainWindow::openToolDialog - call the appropriate dialog function based on the current tool.
  *
  */
 void MainWindow::openToolDialog()
 {
-    switch(currentTool)
+    switch(currentTool->getType())
     {
         case pen: OnPenDialog();             break;
         case line: OnLineDialog();           break;

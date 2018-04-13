@@ -24,6 +24,9 @@ DrawArea::DrawArea(QWidget *parent, QPixmap *image,
 
     mainWindow = (MainWindow*)this->parent();
 
+    // default tool
+    currentTool = (Tool*) penTool;
+
     drawing = false;
     drawingPoly = false;
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -66,7 +69,7 @@ void DrawArea::mousePressEvent(QMouseEvent *e)
         drawing = true;
 
         if(!drawingPoly)
-            startPoint = e->pos();
+            currentTool->setStartPoint(e->pos());
 
         // save a copy of the old image
         oldImage = image->copy(QRect());
@@ -84,7 +87,8 @@ void DrawArea::mouseMoveEvent(QMouseEvent *e)
         if(image->isNull())
             return;
 
-        if(currentTool == line)
+        if(currentTool->getType() == line   ||
+           currentTool->getType() == rect_tool)
         {
             *image = oldImage;
             if(currentLineMode == poly)
@@ -92,7 +96,7 @@ void DrawArea::mouseMoveEvent(QMouseEvent *e)
                 drawingPoly = true;
             }
         }
-        drawTo(e->pos());
+        currentTool->drawTo(e->pos(), this);
     }
 }
 
@@ -111,11 +115,11 @@ void DrawArea::mouseReleaseEvent(QMouseEvent *e)
 
         if(drawingPoly)
         {
-            startPoint = e->pos();
+            currentTool->setStartPoint(e->pos());
             //return;
         }
-        if(currentTool == pen)
-            drawTo(e->pos());
+        if(currentTool->getType() == pen)
+            currentTool->drawTo(e->pos(), this);
 
         // for undo/redo
         mainWindow->saveDrawCommand(oldImage);
@@ -136,63 +140,16 @@ void DrawArea::mouseDoubleClickEvent(QMouseEvent *e)
 }
 
 /**
- * @brief DrawArea::drawTo - Draws from startPoint to endPoint. How these values are
- *                           determined depends on the drawing tool/mode.
- *
- */
-void DrawArea::drawTo(const QPoint &endPoint)
-{
-    switch(currentTool)
-    {
-        case pen:
-        {
-            QPainter painter(image);
-            painter.setPen(*penTool);
-            painter.drawLine(startPoint, endPoint);
-
-            int rad = (penTool->width() / 2) + 2;
-            update(QRect(startPoint, endPoint).normalized()
-                                              .adjusted(-rad, -rad, +rad, +rad));
-            startPoint = endPoint;
-        } break;
-        case line:
-        {
-            QPainter painter(image);
-            painter.setPen(*lineTool);
-            painter.drawLine(startPoint, endPoint);
-
-            //update(getLineRect(startPoint, endPoint));
-            update();
-        } break;
-        case eraser:
-        {
-            QPainter painter(image);
-            painter.setPen(*eraserTool);
-            painter.drawLine(startPoint, endPoint);
-
-            int rad = (eraserTool->width() / 2) + 2;
-            update(QRect(startPoint, endPoint).normalized()
-                                              .adjusted(-rad, -rad, +rad, +rad));
-            startPoint = endPoint;
-        } break;
-        case rect_tool:
-            {
-            } break;
-        default: break;
-    }
-}
-
-/**
  * @brief DrawArea::setCurrentTool - Sets the current tool, unsetting
  *                                   poly mode if necessary.
  *
  */
-void DrawArea::setCurrentTool(const ToolType tool)
+void DrawArea::setCurrentTool(Tool* tool)
 {
     // if no change, return --else cancel poly mode & set tool
     if(currentTool == tool)
         return;
-    else if(currentTool == line)
+    else if(currentTool->getType() == line)
         drawingPoly = false;
 
     currentTool = tool;

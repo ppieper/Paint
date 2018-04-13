@@ -2,9 +2,6 @@
 #include "main_window.h"
 
 
-const int MIN_PEN_SIZE = 1;
-const int MAX_PEN_SIZE = 50;
-
 /**
  * @brief CanvasSizeDialog::CanvasSizeDialog - Dialogue for creating a new canvas.
  *                                             Construct a dialog box containing
@@ -122,9 +119,9 @@ QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
 
     switch(capStyle)
     {
-    case flat: flatButton->setChecked(true);       break;
-    case square: squareButton->setChecked(true);   break;
-    case round_cap: roundButton->setChecked(true); break;
+        case flat: flatButton->setChecked(true);       break;
+        case square: squareButton->setChecked(true);   break;
+        case round_cap: roundButton->setChecked(true); break;
     default: break;
     }
 
@@ -200,11 +197,11 @@ QGroupBox* LineDialog::createLineStyle(LineStyle lineStyle)
 
     switch(lineStyle)
     {
-    case solid: solidButton->setChecked(true);                   break;
-    case dashed: dashedButton->setChecked(true);                 break;
-    case dotted: dottedButton->setChecked(true);                 break;
-    case dash_dotted: dashDottedButton->setChecked(true);        break;
-    case dash_dot_dotted: dashDotDottedButton->setChecked(true); break;
+        case solid: solidButton->setChecked(true);                   break;
+        case dashed: dashedButton->setChecked(true);                 break;
+        case dotted: dottedButton->setChecked(true);                 break;
+        case dash_dotted: dashDottedButton->setChecked(true);        break;
+        case dash_dot_dotted: dashDotDottedButton->setChecked(true); break;
     default: break;
     }
 
@@ -235,9 +232,9 @@ QGroupBox* LineDialog::createCapStyle(CapStyle capStyle)
 
     switch(capStyle)
     {
-    case flat: flatButton->setChecked(true);       break;
-    case square: squareButton->setChecked(true);   break;
-    case round_cap: roundButton->setChecked(true); break;
+        case flat: flatButton->setChecked(true);       break;
+        case square: squareButton->setChecked(true);   break;
+        case round_cap: roundButton->setChecked(true); break;
     default: break;
     }
 
@@ -264,8 +261,8 @@ QGroupBox* LineDialog::createDrawType(DrawType drawType)
 
     switch(drawType)
     {
-    case single: singleButton->setChecked(true); break;
-    case poly: polyButton->setChecked(true);     break;
+        case single: singleButton->setChecked(true); break;
+        case poly: polyButton->setChecked(true);     break;
     default: break;
     }
 
@@ -313,6 +310,8 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
 {
     setWindowTitle(tr("Rectangle Dialog"));
 
+    mainWindow = (MainWindow*)this->parent();
+
     QGroupBox*left = new QGroupBox(this);
 
     QVBoxLayout *vboxL = new QVBoxLayout(this);
@@ -333,15 +332,15 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     lineThicknessSlider->setMaximum(MAX_PEN_SIZE);
     lineThicknessSlider->setSliderPosition(thickness);
     lineThicknessSlider->setTracking(false);
-    //connect(lineThicknessSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnRectLineConfig(int)));
+    connect(lineThicknessSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnRectLineConfig(int)));
 
     QLabel *rRectCurveLabel = new QLabel(tr("Rounded Rectangle Curve"), this);
     rRectCurveSlider = new QSlider(Qt::Horizontal, this);
-    rRectCurveSlider->setMinimum(MIN_PEN_SIZE);
-    rRectCurveSlider->setMaximum(MAX_PEN_SIZE);
+    rRectCurveSlider->setMinimum(MIN_RECT_CURVE);
+    rRectCurveSlider->setMaximum(MAX_RECT_CURVE);
     rRectCurveSlider->setSliderPosition(curve);
     rRectCurveSlider->setTracking(false);
-    //connect(rRectCurveSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnRectCurveConfig(int)));
+    connect(rRectCurveSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnRectCurveConfig(int)));
 
     QGridLayout *grid = new QGridLayout(this);
     grid->addWidget(left, 0,0);
@@ -369,16 +368,16 @@ QGroupBox* RectDialog::createBoundaryStyle(LineStyle boundaryStyle)
     boundaryStyleG->addButton(dashDottedButton, 3);
     boundaryStyleG->addButton(dashDotDottedButton, 4);
 
-    //connect(boundaryStyleG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectBStyleConfig(int)));
+    connect(boundaryStyleG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectBStyleConfig(int)));
 
     switch(boundaryStyle)
     {
-    case solid: solidButton->setChecked(true);                   break;
-    case dashed: dashedButton->setChecked(true);                 break;
-    case dotted: dottedButton->setChecked(true);                 break;
-    case dash_dotted: dashDottedButton->setChecked(true);        break;
-    case dash_dot_dotted: dashDotDottedButton->setChecked(true); break;
-    default: break;
+        case solid: solidButton->setChecked(true);                   break;
+        case dashed: dashedButton->setChecked(true);                 break;
+        case dotted: dottedButton->setChecked(true);                 break;
+        case dash_dotted: dashDottedButton->setChecked(true);        break;
+        case dash_dot_dotted: dashDotDottedButton->setChecked(true); break;
+        default: break;
     }
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -404,14 +403,14 @@ QGroupBox* RectDialog::createShapeType(ShapeType shapeType)
     shapeTypeG->addButton(rRectangleButton, 1);
     shapeTypeG->addButton(ellipseButton, 2);
 
-    //connect(shapeTypeG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnShapeTypeConfig(int)));
+    connect(shapeTypeG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectShapeTypeConfig(int)));
 
     switch(shapeType)
     {
-    case rectangle: rectangleButton->setChecked(true);          break;
-    case rounded_rectangle: rRectangleButton->setChecked(true); break;
-    case ellipse: ellipseButton->setChecked(true);              break;
-    default: break;
+        case rectangle: rectangleButton->setChecked(true);          break;
+        case rounded_rectangle: rRectangleButton->setChecked(true); break;
+        case ellipse: ellipseButton->setChecked(true);              break;
+        default: break;
     }
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -435,13 +434,13 @@ QGroupBox* RectDialog::createFillColor(FillColor fillColor)
     fillColorG->addButton(backgroundButton, 1);
     fillColorG->addButton(noFillButton, 2);
 
-    //connect(fillColorG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectFillConfig(int)));
+    connect(fillColorG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectFillConfig(int)));
 
     switch(fillColor)
     {
-    case foreground: foregroundButton->setChecked(true); break;
-    case background: backgroundButton->setChecked(true); break;
-    case no_fill: noFillButton->setChecked(true);        break;
+        case foreground: foregroundButton->setChecked(true); break;
+        case background: backgroundButton->setChecked(true); break;
+        case no_fill: noFillButton->setChecked(true);        break;
     default: break;
     }
 
@@ -466,13 +465,13 @@ QGroupBox* RectDialog::createBoundaryType(BoundaryType boundaryType)
     boundaryTypeG->addButton(bevelJoinButton, 1);
     boundaryTypeG->addButton(roundJoinButton, 2);
 
-    //connect(boundaryTypeG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectBTypeConfig(int)));
+    connect(boundaryTypeG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectBTypeConfig(int)));
 
     switch(boundaryType)
     {
-    case miter_join: miterJoinButton->setChecked(true); break;
-    case bevel_join: bevelJoinButton->setChecked(true); break;
-    case round_join: roundJoinButton->setChecked(true); break;
+        case miter_join: miterJoinButton->setChecked(true); break;
+        case bevel_join: bevelJoinButton->setChecked(true); break;
+        case round_join: roundJoinButton->setChecked(true); break;
     default: break;
     }
 
