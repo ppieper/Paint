@@ -1,16 +1,17 @@
 #include "commands.h"
 #include <QtWidgets>
 
+
 /**
  * @brief DrawCommand::DrawCommand - A command that keeps a copy of the image
  *                                   before and after something is drawn.
  */
-DrawCommand::DrawCommand(QPixmap old_image, QPixmap *image, QUndoCommand *parent)
+DrawCommand::DrawCommand(const QPixmap &oldImage, QPixmap *image, QUndoCommand *parent)
     : QUndoCommand(parent)
 {
-    m_image = image;
-    m_old_image = old_image;
-    m_new_image = image->copy(QRect());
+    this->image = image;
+    this->oldImage = oldImage;
+    newImage = image->copy(QRect());
 }
 
 /**
@@ -18,7 +19,7 @@ DrawCommand::DrawCommand(QPixmap old_image, QPixmap *image, QUndoCommand *parent
  */
 void DrawCommand::undo()
 {
-    *m_image = m_old_image.copy(QRect());
+    *image = oldImage.copy(QRect());
 }
 
 /**
@@ -26,5 +27,5 @@ void DrawCommand::undo()
  */
 void DrawCommand::redo()
 {
-    *m_image = m_new_image.copy(QRect());
+    *image = newImage.copy(QRect());
 }

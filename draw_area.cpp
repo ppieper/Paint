@@ -187,7 +187,7 @@ void DrawArea::drawTo(const QPoint &endPoint)
  *                                   poly mode if necessary.
  *
  */
-void DrawArea::setCurrentTool(ToolType tool)
+void DrawArea::setCurrentTool(const ToolType tool)
 {
     // if no change, return --else cancel poly mode & set tool
     if(currentTool == tool)
@@ -203,7 +203,7 @@ void DrawArea::setCurrentTool(ToolType tool)
  *                                unsetting poly mode if necessary.
  *
  */
-void DrawArea::setLineMode(DrawType mode)
+void DrawArea::setLineMode(const DrawType mode)
 {
     if(mode == single)
         drawingPoly = false;
@@ -216,7 +216,8 @@ void DrawArea::setLineMode(DrawType mode)
  *                                distance from the line.
  *
  */
-QRect DrawArea::getLineRect(QPoint startPoint, QPoint endPoint)
+QRect DrawArea::getLineRect(const QPoint &startPoint,
+                            const QPoint &endPoint)
 {
     QPoint point = endPoint - startPoint;
     int rad = (lineTool->width() / 2) + sqrt(pow(point.x(), 2) + pow(point.y(), 2));

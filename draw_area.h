@@ -12,8 +12,8 @@ public:
     DrawArea(QWidget *parent, QPixmap *image, QPen *pen,
               QPen *line, QPen *eraser, QPen *rect);
 
-    void setCurrentTool(ToolType tool);
-    void setLineMode(DrawType mode);
+    void setCurrentTool(const ToolType tool);
+    void setLineMode(const DrawType mode);
 
 protected:
     /** mouse event handler */
@@ -27,7 +27,8 @@ protected:
 
 private:
     void drawTo(const QPoint &endPoint);
-    QRect getLineRect(QPoint, QPoint);
+    QRect getLineRect(const QPoint &startPoint,
+                      const QPoint &endPoint);
 
     MainWindow* mainWindow;
 

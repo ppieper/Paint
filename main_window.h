@@ -2,17 +2,9 @@
 #define _MAIN_WINDOW_H
 
 #include "dialog_windows.h"
+#include "toolbar.h"
 #include "draw_area.h"
 
-
-class ToolBar : public QToolBar
-{
-public:
-    ToolBar(QWidget* parent);
-
-private:
-    void createActions();
-};
 
 class MainWindow: public QMainWindow {
 

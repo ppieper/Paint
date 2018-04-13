@@ -2,7 +2,8 @@ HEADERS += \
     main_window.h \
     dialog_windows.h \
     commands.h \
-    draw_area.h
+    draw_area.h \
+    toolbar.h
 SOURCES += main.cpp \
     main_window.cpp \
     commands.cpp \

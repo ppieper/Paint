@@ -4,7 +4,6 @@ using namespace std;
 #include "main_window.h"
 #include "commands.h"
 
-const int TOOLBAR_HEIGHT = 39;
 
 /**
  * @brief MainWindow::MainWindow - the main window, parent to every other widget.
@@ -29,10 +28,10 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     image = new QPixmap();
 
     // initialize tools
-    penTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::SquareCap);
-    lineTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::SquareCap);
-    eraserTool = new QPen(QBrush(Qt::white),10,Qt::SolidLine, Qt::SquareCap);
-    rectTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::SquareCap);
+    penTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::RoundCap);
+    lineTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::RoundCap);
+    eraserTool = new QPen(QBrush(Qt::white),10,Qt::SolidLine, Qt::RoundCap);
+    rectTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::RoundCap);
 
     // adjust window size, name, & stop context menu
     setWindowTitle(name);
@@ -40,7 +39,7 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     setContextMenuPolicy(Qt::PreventContextMenu);
 
     drawArea = new DrawArea(this, image, penTool, lineTool,
-                              eraserTool, rectTool);
+                                  eraserTool, rectTool);
     drawArea->setStyleSheet("background-color:rgba(0,0,0,0)");
     drawArea->setCurrentTool(currentTool);
     setCentralWidget(drawArea);
@@ -49,6 +48,10 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
 MainWindow::~MainWindow()
 {
     delete image;
+    delete penTool;
+    delete lineTool;
+    delete eraserTool;
+    delete rectTool;
 }
 
 /**
@@ -81,7 +84,7 @@ void MainWindow::OnNewImage()
         int height = newCanvas->getHeightValue();
         *image = QPixmap(QSize(width,height));
         image->fill(backgroundColor);
-        this->repaint();
+        drawArea->update(image->rect());
 
         // for undo/redo
         saveDrawCommand(old_image);
@@ -105,7 +108,7 @@ void MainWindow::OnLoadImage()
         QPixmap old_image = image->copy(QRect());
 
 		image->load(s);
-        this->repaint();
+        drawArea->update(image->rect());
 
         // for undo/redo
         saveDrawCommand(old_image);
@@ -158,7 +161,7 @@ void MainWindow::OnUndo()
         return;
 
     undoStack->undo();
-    this->repaint();
+    drawArea->update();
 }
 
 /**
@@ -171,7 +174,7 @@ void MainWindow::OnRedo()
         return;
 
     undoStack->redo();
-    this->repaint();
+    drawArea->update();
 }
 
 /**
@@ -187,7 +190,7 @@ void MainWindow::OnClearAll()
     QPixmap old_image = image->copy(QRect());
 
     image->fill(); // default is white
-    this->repaint();
+    drawArea->update(image->rect());
 
     // for undo/redo
     saveDrawCommand(old_image);
@@ -221,7 +224,15 @@ void MainWindow::OnResizeImage()
 
         // re-scale the image
         *image = image->scaled(QSize(width,height), Qt::IgnoreAspectRatio);
-        this->repaint();
+
+        // get the area to be modified (for updating the widget)
+        QRect modifiedArea;
+        if(old_image.rect().contains(image->rect()))
+            modifiedArea = old_image.rect();
+        else
+            modifiedArea = image->rect();
+
+        drawArea->update(modifiedArea);
 
         // for undo/redo
         saveDrawCommand(old_image);
@@ -338,10 +349,10 @@ void MainWindow::OnPenCapConfig(int capStyle)
 {
     switch (capStyle)
     {
-    case flat: penTool->setCapStyle(Qt::FlatCap);       break;
-    case square: penTool->setCapStyle(Qt::SquareCap);   break;
-    case round_cap: penTool->setCapStyle(Qt::RoundCap); break;
-    default:                                            break;
+        case flat: penTool->setCapStyle(Qt::FlatCap);       break;
+        case square: penTool->setCapStyle(Qt::SquareCap);   break;
+        case round_cap: penTool->setCapStyle(Qt::RoundCap); break;
+        default:                                            break;
     }
 }
 
@@ -359,12 +370,12 @@ void MainWindow::OnLineStyleConfig(int capStyle)
 {
     switch (capStyle)
     {
-    case solid: lineTool->setStyle(Qt::SolidLine);                break;
-    case dashed: lineTool->setStyle(Qt::DashLine);                break;
-    case dotted: lineTool->setStyle(Qt::DotLine);                 break;
-    case dash_dotted: lineTool->setStyle(Qt::DashDotLine);        break;
-    case dash_dot_dotted: lineTool->setStyle(Qt::DashDotDotLine); break;
-    default:                                                     break;
+        case solid: lineTool->setStyle(Qt::SolidLine);                break;
+        case dashed: lineTool->setStyle(Qt::DashLine);                break;
+        case dotted: lineTool->setStyle(Qt::DotLine);                 break;
+        case dash_dotted: lineTool->setStyle(Qt::DashDotLine);        break;
+        case dash_dot_dotted: lineTool->setStyle(Qt::DashDotDotLine); break;
+        default:                                                      break;
     }
 }
 
@@ -372,10 +383,10 @@ void MainWindow::OnLineCapConfig(int capStyle)
 {
     switch (capStyle)
     {
-    case flat: lineTool->setCapStyle(Qt::FlatCap);       break;
-    case square: lineTool->setCapStyle(Qt::SquareCap);   break;
-    case round_cap: lineTool->setCapStyle(Qt::RoundCap); break;
-    default:                                             break;
+        case flat: lineTool->setCapStyle(Qt::FlatCap);       break;
+        case square: lineTool->setCapStyle(Qt::SquareCap);   break;
+        case round_cap: lineTool->setCapStyle(Qt::RoundCap); break;
+        default:                                             break;
     }
 }
 
@@ -383,9 +394,9 @@ void MainWindow::OnDrawTypeConfig(int drawType)
 {
     switch (drawType)
     {
-    case single: drawArea->setLineMode(single); break;
-    case poly:   drawArea->setLineMode(poly);   break;
-    default:     break;
+        case single: drawArea->setLineMode(single); break;
+        case poly:   drawArea->setLineMode(poly);   break;
+        default:     break;
     }
 }
 

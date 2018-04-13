@@ -1,5 +1,6 @@
 #include "main_window.h"
 
+
 /**
  * @brief ToolBar::ToolBar - Wrapper class for QToolBar.
  *                           construct a ToolBar with icons & actions.
