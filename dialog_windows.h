@@ -1,7 +1,6 @@
 #ifndef DIALOG_WINDOWS_H
 #define DIALOG_WINDOWS_H
 
-#include <qmessagebox.h>
 #include <QtWidgets>
 
 
@@ -17,16 +16,14 @@ enum ShapeType {rectangle, rounded_rectangle, ellipse};
 enum FillColor {foreground, background, no_fill};
 enum BoundaryType {miter_join, bevel_join, round_join};
 
-class QSpinBox;
-class QGroupBox;
-class QLabel;
+class MainWindow;
 
 class CanvasSizeDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    CanvasSizeDialog(QWidget* parent, const char* name = 0,
+    CanvasSizeDialog(QWidget* parent = 0, const char* name = 0,
                      int width = DEFAULT_IMG_WIDTH,
                      int height = DEFAULT_IMG_HEIGHT);
 
@@ -54,6 +51,7 @@ public:
 public slots:
 
 private:
+    MainWindow* mainWindow;
     QButtonGroup* lineStyleG;
     QButtonGroup* capStyleG;
     QButtonGroup* drawTypeG;
@@ -73,6 +71,7 @@ public:
 public slots:
 
 private:
+    MainWindow* mainWindow;
     QButtonGroup* capStyleG;
     QSlider* penSizeSlider;
     QGroupBox* createCapStyle(CapStyle);
@@ -89,6 +88,7 @@ public:
 public slots:
 
 private:
+    MainWindow* mainWindow;
     QSlider* eraserThicknessSlider;
 };
 
@@ -105,6 +105,7 @@ public:
 public slots:
 
 private:
+    MainWindow* mainWindow;
     QButtonGroup* boundaryStyleG;
     QButtonGroup* shapeTypeG;
     QButtonGroup* fillColorG;

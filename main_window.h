@@ -26,10 +26,12 @@ class MainWindow: public QMainWindow {
     /** mouse event handler */
     void mousePressEvent (QMouseEvent *);
 
+    /** save a command to the undo stack */
     void saveDrawCommand(QPixmap);
 
 	public slots:
 
+    /** toolbar actions */
     void OnNewImage();
 	void OnLoadImage();
     void OnSaveImage();
@@ -37,15 +39,23 @@ class MainWindow: public QMainWindow {
     void OnRedo();
     void OnClearAll();
     void OnResizeImage();
+    void OnPickColor(int);
     void OnChangeTool(int);
+    /** tool dialogs */
     void OnPenDialog();
     void OnLineDialog();
     void OnEraserDialog();
     void OnRectangleDialog();
-    void OnPickColor(int);
+    /** pen tool */
     void OnPenCapConfig(int);
     void OnPenSizeConfig(int);
+    /** eraser tool */
     void OnEraserConfig(int);
+    /** line tool */
+    void OnLineStyleConfig(int);
+    void OnLineCapConfig(int);
+    void OnDrawTypeConfig(int);
+    void OnLineThicknessConfig(int);
 
 	private:
 

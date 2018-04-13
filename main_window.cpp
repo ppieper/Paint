@@ -30,7 +30,9 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
 
     // initialize tools
     penTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::SquareCap);
+    lineTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::SquareCap);
     eraserTool = new QPen(QBrush(Qt::white),10,Qt::SolidLine, Qt::SquareCap);
+    rectTool = new QPen(QBrush(Qt::black),1,Qt::SolidLine, Qt::SquareCap);
 
     // adjust window size, name, & stop context menu
     setWindowTitle(name);
@@ -40,6 +42,7 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     drawArea = new DrawArea(this, image, penTool, lineTool,
                               eraserTool, rectTool);
     drawArea->setStyleSheet("background-color:rgba(0,0,0,0)");
+    drawArea->setCurrentTool(currentTool);
     setCentralWidget(drawArea);
 }
 
@@ -246,11 +249,16 @@ void MainWindow::OnPickColor(int which)
     {
        if(which == foreground)
        {
-           foregroundColor = aColor;
-           penTool->setColor(foregroundColor);
+            foregroundColor = aColor;
+            penTool->setColor(foregroundColor);
+            lineTool->setColor(foregroundColor);
+            rectTool->setColor(foregroundColor);
        }
        else
+       {
            backgroundColor = aColor;
+           eraserTool->setColor(backgroundColor);
+       }
     }
     // done with the dialog, free it
     delete colorDialog;
@@ -345,6 +353,45 @@ void MainWindow::OnPenSizeConfig(int value)
 void MainWindow::OnEraserConfig(int value)
 {
     eraserTool->setWidth(value);
+}
+
+void MainWindow::OnLineStyleConfig(int capStyle)
+{
+    switch (capStyle)
+    {
+    case solid: lineTool->setStyle(Qt::SolidLine);                break;
+    case dashed: lineTool->setStyle(Qt::DashLine);                break;
+    case dotted: lineTool->setStyle(Qt::DotLine);                 break;
+    case dash_dotted: lineTool->setStyle(Qt::DashDotLine);        break;
+    case dash_dot_dotted: lineTool->setStyle(Qt::DashDotDotLine); break;
+    default:                                                     break;
+    }
+}
+
+void MainWindow::OnLineCapConfig(int capStyle)
+{
+    switch (capStyle)
+    {
+    case flat: lineTool->setCapStyle(Qt::FlatCap);       break;
+    case square: lineTool->setCapStyle(Qt::SquareCap);   break;
+    case round_cap: lineTool->setCapStyle(Qt::RoundCap); break;
+    default:                                             break;
+    }
+}
+
+void MainWindow::OnDrawTypeConfig(int drawType)
+{
+    switch (drawType)
+    {
+    case single: drawArea->setLineMode(single); break;
+    case poly:   drawArea->setLineMode(poly);   break;
+    default:     break;
+    }
+}
+
+void MainWindow::OnLineThicknessConfig(int value)
+{
+    lineTool->setWidth(value);
 }
 
 /**

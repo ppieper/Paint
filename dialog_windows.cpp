@@ -86,7 +86,7 @@ PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
 {
     setWindowTitle(tr("Pen Dialog"));
 
-    MainWindow* mainWindow = (MainWindow*)this->parent();
+    mainWindow = (MainWindow*)this->parent();
 
     QLabel *penSizeLabel = new QLabel(tr("Pen Size"), this);
     penSizeSlider = new QSlider(Qt::Horizontal, this);
@@ -110,7 +110,7 @@ QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
     QRadioButton *squareButton = new QRadioButton(tr("Square"), this);
     QRadioButton *roundButton = new QRadioButton(tr("Round"), this);
 
-    MainWindow* mainWindow = (MainWindow*)this->parent();
+    mainWindow = (MainWindow*)this->parent();
 
     capStyleG = new QButtonGroup(this);
     capStyleG->addButton(flatButton, 0);
@@ -137,7 +137,8 @@ QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
 }
 
 /**
- * @brief LineDialog::LineSizeDialog - Dialogue selecting what kind of line to draw.
+ * @brief LineDialog::LineSizeDialog - Dialogue for selecting what kind of line to draw.
+ *
  */
 LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
                                         CapStyle capStyle,
@@ -148,6 +149,8 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
     setWindowTitle(tr("Line Dialog"));
 
     QGroupBox*left = new QGroupBox(this);
+
+    mainWindow = (MainWindow*)this->parent();
 
     QVBoxLayout *vboxL = new QVBoxLayout(this);
     vboxL->addWidget(createLineStyle(lineStyle));
@@ -165,6 +168,8 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
     lineThicknessSlider->setMinimum(MIN_BRUSH_SIZE);
     lineThicknessSlider->setMaximum(MAX_BRUSH_SIZE);
     lineThicknessSlider->setSliderPosition(thickness);
+    lineThicknessSlider->setTracking(false);
+    connect(lineThicknessSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnLineThicknessConfig(int)));
 
     QGridLayout *grid = new QGridLayout(this);
     grid->addWidget(left, 0,0);
@@ -189,6 +194,8 @@ QGroupBox* LineDialog::createLineStyle(LineStyle lineStyle)
     lineStyleG->addButton(dottedButton, 2);
     lineStyleG->addButton(dashDottedButton, 3);
     lineStyleG->addButton(dashDotDottedButton, 4);
+
+    connect(lineStyleG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnLineStyleConfig(int)));
 
     switch(lineStyle)
     {
@@ -223,6 +230,8 @@ QGroupBox* LineDialog::createCapStyle(CapStyle capStyle)
     capStyleG->addButton(squareButton, 1);
     capStyleG->addButton(roundButton, 2);
 
+    connect(capStyleG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnLineCapConfig(int)));
+
     switch(capStyle)
     {
     case flat: flatButton->setChecked(true);       break;
@@ -249,6 +258,8 @@ QGroupBox* LineDialog::createDrawType(DrawType drawType)
     drawTypeG = new QButtonGroup(this);
     drawTypeG->addButton(singleButton, 0);
     drawTypeG->addButton(polyButton, 1);
+
+    connect(drawTypeG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnDrawTypeConfig(int)));
 
     switch(drawType)
     {
@@ -320,12 +331,16 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     lineThicknessSlider->setMinimum(MIN_BRUSH_SIZE);
     lineThicknessSlider->setMaximum(MAX_BRUSH_SIZE);
     lineThicknessSlider->setSliderPosition(thickness);
+    lineThicknessSlider->setTracking(false);
+    //connect(lineThicknessSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnRectLineConfig(int)));
 
     QLabel *rRectCurveLabel = new QLabel(tr("Rounded Rectangle Curve"), this);
     rRectCurveSlider = new QSlider(Qt::Horizontal, this);
     rRectCurveSlider->setMinimum(MIN_BRUSH_SIZE);
     rRectCurveSlider->setMaximum(MAX_BRUSH_SIZE);
     rRectCurveSlider->setSliderPosition(curve);
+    rRectCurveSlider->setTracking(false);
+    //connect(rRectCurveSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnRectCurveConfig(int)));
 
     QGridLayout *grid = new QGridLayout(this);
     grid->addWidget(left, 0,0);
@@ -352,6 +367,8 @@ QGroupBox* RectDialog::createBoundaryStyle(LineStyle boundaryStyle)
     boundaryStyleG->addButton(dottedButton, 2);
     boundaryStyleG->addButton(dashDottedButton, 3);
     boundaryStyleG->addButton(dashDotDottedButton, 4);
+
+    //connect(boundaryStyleG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectBStyleConfig(int)));
 
     switch(boundaryStyle)
     {
@@ -386,6 +403,8 @@ QGroupBox* RectDialog::createShapeType(ShapeType shapeType)
     shapeTypeG->addButton(rRectangleButton, 1);
     shapeTypeG->addButton(ellipseButton, 2);
 
+    //connect(shapeTypeG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnShapeTypeConfig(int)));
+
     switch(shapeType)
     {
     case rectangle: rectangleButton->setChecked(true);          break;
@@ -414,6 +433,8 @@ QGroupBox* RectDialog::createFillColor(FillColor fillColor)
     fillColorG->addButton(foregroundButton, 0);
     fillColorG->addButton(backgroundButton, 1);
     fillColorG->addButton(noFillButton, 2);
+
+    //connect(fillColorG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectFillConfig(int)));
 
     switch(fillColor)
     {
@@ -444,6 +465,8 @@ QGroupBox* RectDialog::createBoundaryType(BoundaryType boundaryType)
     boundaryTypeG->addButton(miterJoinButton, 0);
     boundaryTypeG->addButton(bevelJoinButton, 1);
     boundaryTypeG->addButton(roundJoinButton, 2);
+
+    //connect(boundaryTypeG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectBTypeConfig(int)));
 
     switch(boundaryType)
     {
