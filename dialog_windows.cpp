@@ -45,7 +45,7 @@ QGroupBox* CanvasSizeDialog::createSpinBoxes(int width, int height)
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 
     // put it all together
-    QFormLayout *spinBoxLayout = new QFormLayout(this);
+    QFormLayout *spinBoxLayout = new QFormLayout(spinBoxesGroup);
     spinBoxLayout->addRow(tr("Width: "), widthSpinBox);
     spinBoxLayout->addRow(tr("Height: "), heightSpinBox);
     spinBoxLayout->addRow(okButton);
