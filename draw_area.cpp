@@ -94,11 +94,11 @@ void DrawArea::mouseMoveEvent(QMouseEvent *e)
         if(image->isNull())
             return;
 
-        if(currentTool->getType() == line   ||
-           currentTool->getType() == rect_tool)
+        ToolType type = currentTool->getType();
+        if(type == line || type == rect_tool)
         {
             *image = oldImage;
-            if(currentLineMode == poly)
+            if(type == line && currentLineMode == poly)
             {
                 drawingPoly = true;
             }
