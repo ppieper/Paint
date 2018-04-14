@@ -93,4 +93,4 @@ class MainWindow: public QMainWindow {
     RectDialog* rectDialog = 0;
 };
 
-#endif
+#endif // MAIN_WINDOW_H

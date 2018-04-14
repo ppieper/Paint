@@ -1,8 +1,8 @@
 #ifndef DRAW_AREA_H
 #define DRAW_AREA_H
 
-
 #include "constants.h"
+
 
 class Tool;
 class MainWindow;
@@ -49,4 +49,4 @@ private:
     bool drawingPoly;
 };
 
-#endif
+#endif // DRAW_AREA_H

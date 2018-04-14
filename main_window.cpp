@@ -30,10 +30,10 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     backgroundColor = Qt::white;
 
     // initialize tools
-    penTool = new PenTool(QBrush(Qt::black),1,Qt::SolidLine, image, Qt::RoundCap);
-    lineTool = new LineTool(QBrush(Qt::black),1,Qt::SolidLine, image, Qt::RoundCap);
-    eraserTool = new EraserTool(QBrush(Qt::white),10,Qt::SolidLine, image, Qt::RoundCap);
-    rectTool = new RectTool(QBrush(Qt::black),1,Qt::SolidLine, image, Qt::RoundCap);
+    penTool = new PenTool(QBrush(Qt::black),1,Qt::SolidLine,Qt::RoundCap,image);
+    lineTool = new LineTool(QBrush(Qt::black),1,Qt::SolidLine, Qt::RoundCap,image);
+    eraserTool = new EraserTool(QBrush(Qt::white),10,Qt::SolidLine,Qt::RoundCap,image);
+    rectTool = new RectTool(QBrush(Qt::black),1,Qt::SolidLine,Qt::RoundCap,image);
 
     // default tool
     currentTool = penTool;
