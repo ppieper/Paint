@@ -171,20 +171,6 @@ void DrawArea::setLineMode(const DrawType mode)
 {
     if(mode == single)
         drawingPoly = false;
-    currentLineMode = mode;
-}
 
-/**
- * @brief DrawArea::getLineRect - Calculate true distance between start/end points
- *                                and return a rectangle that extends a radius of that
- *                                distance from the line.
- *
- */
-QRect DrawArea::getLineRect(const QPoint &startPoint,
-                            const QPoint &endPoint)
-{
-    QPoint point = endPoint - startPoint;
-    int rad = (lineTool->width() / 2) + sqrt(pow(point.x(), 2) + pow(point.y(), 2));
-    return QRect(startPoint, endPoint).normalized()
-                                      .adjusted(-rad, -rad, +rad, +rad);
+    currentLineMode = mode;
 }

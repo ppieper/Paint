@@ -11,6 +11,7 @@ public:
     DrawCommand(const QPixmap &oldImage, QPixmap *image, QUndoCommand *parent = 0);
     void undo() override;
     void redo() override;
+
 private:
     QPixmap* image;
     QPixmap oldImage;

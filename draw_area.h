@@ -33,10 +33,6 @@ protected:
     void virtual paintEvent(QPaintEvent *event) override;
 
 private:
-    void drawTo(const QPoint &endPoint);
-    QRect getLineRect(const QPoint &startPoint,
-                      const QPoint &endPoint);
-
     /** reference to the main window */
     MainWindow* mainWindow;
 

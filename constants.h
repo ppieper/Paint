@@ -15,6 +15,12 @@ const int MAX_PEN_SIZE = 50;
 const int MIN_RECT_CURVE = 0;
 const int MAX_RECT_CURVE = 100;
 
+/** spinbox ranges */
+const int MIN_IMG_WIDTH = 1;
+const int MAX_IMG_WIDTH = 9999; // probably too high for a QPixmap
+const int MIN_IMG_HEIGHT = 1;
+const int MAX_IMG_HEIGHT = 9999;
+
 enum ToolType {pen, line, eraser, rect_tool};
 enum LineStyle {solid, dashed, dotted, dash_dotted, dash_dot_dotted};
 enum CapStyle {flat, square, round_cap};

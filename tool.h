@@ -48,16 +48,12 @@ class LineTool : public Tool
 public:
     LineTool(const QBrush &brush, qreal width, Qt::PenStyle s = Qt::SolidLine,
              Qt::PenCapStyle c = Qt::RoundCap, QPixmap *i = 0,
-             Qt::PenJoinStyle j = Qt::BevelJoin,
-             DrawType mode = single)
-       : Tool(brush, width, s, c, i, j) { drawType = mode;}
+             Qt::PenJoinStyle j = Qt::BevelJoin)
+       : Tool(brush, width, s, c, i, j) {}
     virtual ToolType getType() const { return line; }
     virtual void drawTo(const QPoint&, DrawArea*);
 
-    void setDrawType(DrawType mode) { drawType = mode; }
-
 private:
-    DrawType drawType;
 };
 
 class EraserTool : public PenTool
@@ -86,14 +82,14 @@ public:
              int roundedCurve = DEFAULT_RECT_CURVE);
 
     virtual ToolType getType() const { return rect_tool; }
+    virtual void drawTo(const QPoint&, DrawArea*);
 
     FillColor getFillMode() const { return fillMode; }
     void setFillMode(FillColor mode) { fillMode = mode; }
     void setShapeType(ShapeType shape) { shapeType = shape; }
     void setFillColor(QColor color) { fillColor = color; }
     void setCurve(int value) { roundedCurve = value; }
-
-    virtual void drawTo(const QPoint&, DrawArea*);
+    QRect adjustPoints(const QPoint&);
 
 private:
     ShapeType shapeType;

@@ -5,12 +5,11 @@
 #include "toolbar.h"
 
 
-class MainWindow: public QMainWindow {
-
+class MainWindow: public QMainWindow
+{
 	Q_OBJECT
 
-	public:
-
+public:
     MainWindow(QWidget* parent = 0, const char* name = 0);
     ~MainWindow();
 
@@ -20,8 +19,7 @@ class MainWindow: public QMainWindow {
     /** save a command to the undo stack */
     void saveDrawCommand(QPixmap);
 
-	public slots:
-
+public slots:
     /** toolbar actions */
     void OnNewImage();
 	void OnLoadImage();
@@ -56,12 +54,11 @@ class MainWindow: public QMainWindow {
     void OnRectLineConfig(int);
     void OnRectCurveConfig(int);
 
-	private:
+private:
+    void createMenu();
 
     /** tool dialog dispatcher */
     void openToolDialog();
-
-    void createMenu();
 
     /** undo stack */
     QUndoStack* undoStack;

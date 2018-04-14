@@ -9,9 +9,8 @@
 CanvasSizeDialog::CanvasSizeDialog(QWidget* parent, const char* name, int width, int height)
     :QDialog(parent)
 {
-    createSpinBoxes(width,height);
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(spinBoxesGroup);
+    layout->addWidget(createSpinBoxes(width,height));
     setLayout(layout);
 
     setWindowTitle(tr(name));
@@ -21,20 +20,20 @@ CanvasSizeDialog::CanvasSizeDialog(QWidget* parent, const char* name, int width,
  * @brief NewCanvasDialog::createSpinBoxes - Create the QSpinBoxes for the dialog
  *                                           box as well as the buttons
  */
-void CanvasSizeDialog::createSpinBoxes(int width, int height)
+QGroupBox* CanvasSizeDialog::createSpinBoxes(int width, int height)
 {
-    spinBoxesGroup = new QGroupBox(tr("Image Size"), this);
+    QGroupBox *spinBoxesGroup = new QGroupBox(tr("Image Size"), this);
 
     // the width field
     widthSpinBox = new QSpinBox(this);
-    widthSpinBox->setRange(1, 10000);
+    widthSpinBox->setRange(MIN_IMG_WIDTH, MAX_IMG_WIDTH);
     widthSpinBox->setSingleStep(1);
     widthSpinBox->setValue(width);
     widthSpinBox->setSuffix("px");
 
     // the height field
     heightSpinBox = new QSpinBox(this);
-    heightSpinBox->setRange(1, 10000);
+    heightSpinBox->setRange(MIN_IMG_HEIGHT, MAX_IMG_HEIGHT);
     heightSpinBox->setSingleStep(1);
     heightSpinBox->setValue(height);
     heightSpinBox->setSuffix("px");
@@ -46,12 +45,14 @@ void CanvasSizeDialog::createSpinBoxes(int width, int height)
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 
     // put it all together
-    QFormLayout *spinBoxLayout = new QFormLayout;
+    QFormLayout *spinBoxLayout = new QFormLayout(this);
     spinBoxLayout->addRow(tr("Width: "), widthSpinBox);
     spinBoxLayout->addRow(tr("Height: "), heightSpinBox);
     spinBoxLayout->addRow(okButton);
     spinBoxLayout->addRow(cancelButton);
     spinBoxesGroup->setLayout(spinBoxLayout);
+
+    return spinBoxesGroup;
 }
 
 /**
@@ -106,7 +107,7 @@ QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
         default:                                       break;
     }
 
-    QHBoxLayout *hbox = new QHBoxLayout();
+    QHBoxLayout *hbox = new QHBoxLayout(capStyles);
     hbox->addWidget(flatButton);
     hbox->addWidget(squareButton);
     hbox->addWidget(roundButton);
@@ -187,7 +188,7 @@ QGroupBox* LineDialog::createLineStyle(LineStyle lineStyle)
         default:                                                     break;
     }
 
-    QVBoxLayout *vbox = new QVBoxLayout();
+    QVBoxLayout *vbox = new QVBoxLayout(lineStyles);
     vbox->addWidget(solidButton);
     vbox->addWidget(dashedButton);
     vbox->addWidget(dottedButton);
@@ -220,7 +221,7 @@ QGroupBox* LineDialog::createCapStyle(CapStyle capStyle)
         default:                                       break;
     }
 
-    QVBoxLayout *vbox = new QVBoxLayout();
+    QVBoxLayout *vbox = new QVBoxLayout(capStyles);
     vbox->addWidget(flatButton);
     vbox->addWidget(squareButton);
     vbox->addWidget(roundButton);
@@ -248,7 +249,7 @@ QGroupBox* LineDialog::createDrawType(DrawType drawType)
         default:                                     break;
     }
 
-    QVBoxLayout *vbox = new QVBoxLayout();
+    QVBoxLayout *vbox = new QVBoxLayout(drawTypes);
     vbox->addWidget(singleButton);
     vbox->addWidget(polyButton);
     drawTypes->setLayout(vbox);
@@ -314,6 +315,7 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     lineThicknessSlider->setMaximum(MAX_PEN_SIZE);
     lineThicknessSlider->setSliderPosition(thickness);
     lineThicknessSlider->setTracking(false);
+
     connect(lineThicknessSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnRectLineConfig(int)));
 
     QLabel *rRectCurveLabel = new QLabel(tr("Rounded Rectangle Curve"), this);
@@ -322,6 +324,7 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     rRectCurveSlider->setMaximum(MAX_RECT_CURVE);
     rRectCurveSlider->setSliderPosition(curve);
     rRectCurveSlider->setTracking(false);
+
     connect(rRectCurveSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnRectCurveConfig(int)));
 
     QGridLayout *grid = new QGridLayout(this);
@@ -362,7 +365,7 @@ QGroupBox* RectDialog::createBoundaryStyle(LineStyle boundaryStyle)
         default:                                                     break;
     }
 
-    QVBoxLayout *vbox = new QVBoxLayout();
+    QVBoxLayout *vbox = new QVBoxLayout(boundaryStyles);
     vbox->addWidget(solidButton);
     vbox->addWidget(dashedButton);
     vbox->addWidget(dottedButton);
@@ -395,7 +398,7 @@ QGroupBox* RectDialog::createShapeType(ShapeType shapeType)
         default:                                                    break;
     }
 
-    QVBoxLayout *vbox = new QVBoxLayout();
+    QVBoxLayout *vbox = new QVBoxLayout(shapeTypes);
     vbox->addWidget(rectangleButton);
     vbox->addWidget(rRectangleButton);
     vbox->addWidget(ellipseButton);
@@ -426,7 +429,7 @@ QGroupBox* RectDialog::createFillColor(FillColor fillColor)
         default:                                             break;
     }
 
-    QVBoxLayout *vbox = new QVBoxLayout();
+    QVBoxLayout *vbox = new QVBoxLayout(fillColors);
     vbox->addWidget(foregroundButton);
     vbox->addWidget(backgroundButton);
     vbox->addWidget(noFillButton);
@@ -457,7 +460,7 @@ QGroupBox* RectDialog::createBoundaryType(BoundaryType boundaryType)
         default:                                            break;
     }
 
-    QVBoxLayout *vbox = new QVBoxLayout();
+    QVBoxLayout *vbox = new QVBoxLayout(boundaryTypes);
     vbox->addWidget(miterJoinButton);
     vbox->addWidget(bevelJoinButton);
     vbox->addWidget(roundJoinButton);

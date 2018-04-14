@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
 {
     // initialize the undo stack
     undoStack = new QUndoStack(this);
+    undoStack->setUndoLimit(100);
 
     // create the toolbar
     toolbar = new ToolBar(this);
@@ -62,10 +63,6 @@ MainWindow::~MainWindow()
     delete lineTool;
     delete eraserTool;
     delete rectTool;
-    delete penDialog;
-    delete lineDialog;
-    delete rectDialog;
-    delete eraserDialog;
 }
 
 /**
@@ -92,7 +89,7 @@ void MainWindow::OnNewImage()
     if (newCanvas->result())
     {
         // save a copy of the old image
-        QPixmap old_image = image->copy(QRect());
+        QPixmap old_image = image->copy();
 
         int width = newCanvas->getWidthValue();
         int height = newCanvas->getHeightValue();
@@ -119,7 +116,7 @@ void MainWindow::OnLoadImage()
 	if (! s.isNull())
 	{
         // save a copy of the old image
-        QPixmap old_image = image->copy(QRect());
+        QPixmap old_image = image->copy();
 
 		image->load(s);
         drawArea->update();
@@ -154,7 +151,7 @@ void MainWindow::OnSaveImage()
         if (! s.isNull())
         {
             // save a copy of the old image
-            QPixmap old_image = image->copy(QRect());
+            QPixmap old_image = image->copy();
 
             image->save(s, "BMP");
 
@@ -202,7 +199,7 @@ void MainWindow::OnClearAll()
         return;
 
     // save a copy of the old image
-    QPixmap old_image = image->copy(QRect());
+    QPixmap old_image = image->copy();
 
     image->fill(); // default is white
     drawArea->update(image->rect());
@@ -228,7 +225,7 @@ void MainWindow::OnResizeImage()
     if (newCanvas->result())
     {
         // save a copy of the old image
-        QPixmap old_image = image->copy(QRect());
+        QPixmap old_image = image->copy();
 
         // get new dimension from dialog
         int width = newCanvas->getWidthValue();
@@ -236,19 +233,14 @@ void MainWindow::OnResizeImage()
 
         // if no change, do nothing
         if(image->size() == QSize(width, height))
+        {
+            delete newCanvas;
             return;
+        }
 
         // else re-scale the image
         *image = image->scaled(QSize(width,height), Qt::IgnoreAspectRatio);
-
-        // get the area to be modified (for updating the widget)
-        QRect modifiedArea;
-        if(old_image.rect().contains(image->rect()))
-            modifiedArea = old_image.rect();
-        else
-            modifiedArea = image->rect();
-
-        drawArea->update(modifiedArea);
+        drawArea->update();
 
         // for undo/redo
         saveDrawCommand(old_image);

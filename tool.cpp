@@ -66,7 +66,7 @@ void RectTool::drawTo(const QPoint &endPoint, DrawArea* drawArea)
 {
     QPainter painter(getImage());
     painter.setPen((QPen)*this);
-    QRect rect = QRect(getStartPoint(), endPoint);
+    QRect rect = adjustPoints(endPoint);
 
     //draw a rectangle, square, or ellipse--fill or no fill--based on settings
     switch(shapeType)
@@ -94,4 +94,22 @@ void RectTool::drawTo(const QPoint &endPoint, DrawArea* drawArea)
           break;
     }
     drawArea->update();
+}
+
+/**
+ * @brief RectTool::adjustPoints - switches the startPoint and endPoint
+ *                                 (top left becomes bottom right, vice
+ *                                  versa)
+ *
+ */
+QRect RectTool::adjustPoints(const QPoint &endPoint)
+{
+    // 'top left' and 'bottom right' are relative, so we may need to
+    // switch the points
+    QRect rect;
+    if(endPoint.x() < getStartPoint().x())
+        rect = QRect(endPoint, getStartPoint());
+    else
+        rect = QRect(getStartPoint(), endPoint);
+    return rect;
 }
