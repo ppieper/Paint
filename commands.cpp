@@ -24,7 +24,7 @@ void DrawCommand::undo()
 }
 
 /**
- * @brief TDrawCommand::redo - 'Undo' an undo, restoring the new image
+ * @brief DrawCommand::redo - 'Undo' an undo, restoring the new image
  */
 void DrawCommand::redo()
 {

@@ -13,41 +13,19 @@ using namespace std;
 MainWindow::MainWindow(QWidget* parent, const char* name)
     :QMainWindow(parent)
 {
-    // initialize the undo stack
-    undoStack = new QUndoStack(this);
-    undoStack->setUndoLimit(100);
+    // create the DrawArea, which will receive the draw mouse events
+    drawArea = new DrawArea(this);
+    drawArea->setStyleSheet("background-color:transparent");
+
+    // get default tool
+    currentTool = drawArea->getCurrentTool();
 
     // create the toolbar
-    toolbar = new ToolBar(this);
+    toolbar = new ToolBar(this, drawArea);
     addToolBar(toolbar);
 
     // create the menu (needs toolbar to be created first!)
     createMenu();
-
-    //create the image
-    image = new QPixmap();
-
-    // initialize colors
-    foregroundColor = Qt::black;
-    backgroundColor = Qt::white;
-
-    // initialize tools
-    penTool = new PenTool(QBrush(Qt::black),1,Qt::SolidLine,
-                          Qt::RoundCap,image);
-    lineTool = new LineTool(QBrush(Qt::black),1,Qt::SolidLine,
-                            Qt::RoundCap,image);
-    eraserTool = new EraserTool(QBrush(Qt::white),10,Qt::SolidLine,
-                                Qt::RoundCap,image);
-    rectTool = new RectTool(QBrush(Qt::black),1,Qt::SolidLine,Qt::
-                            RoundCap,image);
-
-    // set default tool
-    currentTool = penTool;
-
-    // create the DrawArea, which will receive the draw mouse events
-    drawArea = new DrawArea(this, image, penTool, lineTool,
-                                  eraserTool, rectTool, currentTool);
-    drawArea->setStyleSheet("background-color:rgba(0,0,0,0)");
 
     // adjust window size, name, & stop context menu
     setWindowTitle(name);
@@ -58,11 +36,6 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
 
 MainWindow::~MainWindow()
 {
-    delete image;
-    delete penTool;
-    delete lineTool;
-    delete eraserTool;
-    delete rectTool;
 }
 
 /**
@@ -88,17 +61,9 @@ void MainWindow::OnNewImage()
     // if user hit 'OK' button, create new image
     if (newCanvas->result())
     {
-        // save a copy of the old image
-        QPixmap old_image = image->copy();
-
-        int width = newCanvas->getWidthValue();
-        int height = newCanvas->getHeightValue();
-        *image = QPixmap(QSize(width,height));
-        image->fill(backgroundColor);
-        drawArea->update();
-
-        // for undo/redo
-        saveDrawCommand(old_image);
+        QSize size = QSize(newCanvas->getWidthValue(),
+                           newCanvas->getHeightValue());
+        drawArea->createNewImage(size);
     }
     // done with the dialog, free it
     delete newCanvas;
@@ -115,14 +80,7 @@ void MainWindow::OnLoadImage()
                                                     tr("BMP image (*.bmp)"));
 	if (! s.isNull())
 	{
-        // save a copy of the old image
-        QPixmap old_image = image->copy();
-
-		image->load(s);
-        drawArea->update();
-
-        // for undo/redo
-        saveDrawCommand(old_image);
+        drawArea->loadImage(s);
 	}
 }
 
@@ -132,7 +90,7 @@ void MainWindow::OnLoadImage()
  */
 void MainWindow::OnSaveImage()
 {
-    if(image->isNull())
+    if(drawArea->getImage()->isNull())
         return;
 
     // use custom dialog settings for appending suffixes
@@ -150,62 +108,11 @@ void MainWindow::OnSaveImage()
 
         if (! s.isNull())
         {
-            // save a copy of the old image
-            QPixmap old_image = image->copy();
-
-            image->save(s, "BMP");
-
-            // for undo/redo
-            saveDrawCommand(old_image);
+            drawArea->saveImage(s);
         }
     }
     // done with the dialog, free it
     delete fileDialog;
-}
-
-/**
- * @brief MainWindow::OnSaveImage - Undo a previous action.
- *
- */
-void MainWindow::OnUndo()
-{
-    if(!undoStack->canUndo())
-        return;
-
-    undoStack->undo();
-    drawArea->update();
-}
-
-/**
- * @brief MainWindow::OnRedo - Redo a previously undone action.
- *
- */
-void MainWindow::OnRedo()
-{
-    if(!undoStack->canRedo())
-        return;
-
-    undoStack->redo();
-    drawArea->update();
-}
-
-/**
- * @brief MainWindow::OnClearAll - Clear the image.
- *
- */
-void MainWindow::OnClearAll()
-{
-    if(image->isNull())
-        return;
-
-    // save a copy of the old image
-    QPixmap old_image = image->copy();
-
-    image->fill(); // default is white
-    drawArea->update(image->rect());
-
-    // for undo/redo
-    saveDrawCommand(old_image);
 }
 
 /**
@@ -214,6 +121,7 @@ void MainWindow::OnClearAll()
  */
 void MainWindow::OnResizeImage()
 {
+    QPixmap *image = drawArea->getImage();
     if(image->isNull())
         return;
 
@@ -224,26 +132,8 @@ void MainWindow::OnResizeImage()
     // if user hit 'OK' button, create new image
     if (newCanvas->result())
     {
-        // save a copy of the old image
-        QPixmap old_image = image->copy();
-
-        // get new dimension from dialog
-        int width = newCanvas->getWidthValue();
-        int height = newCanvas->getHeightValue();
-
-        // if no change, do nothing
-        if(image->size() == QSize(width, height))
-        {
-            delete newCanvas;
-            return;
-        }
-
-        // else re-scale the image
-        *image = image->scaled(QSize(width,height), Qt::IgnoreAspectRatio);
-        drawArea->update();
-
-        // for undo/redo
-        saveDrawCommand(old_image);
+         drawArea->resizeImage(QSize(newCanvas->getWidthValue(),
+                                     newCanvas->getHeightValue()));
     }
     // done with the dialog, free it
     delete newCanvas;
@@ -257,7 +147,9 @@ void MainWindow::OnResizeImage()
 void MainWindow::OnPickColor(int which)
 {
     QColorDialog* colorDialog = new QColorDialog(this);
-    QColor aColor = colorDialog->getColor(which == foreground ? foregroundColor
+    QColor foregroundColor = drawArea->getForegroundColor();
+    QColor backgroundColor = drawArea->getBackgroundColor();
+    QColor color = colorDialog->getColor(which == foreground ? foregroundColor
                                                               : backgroundColor,
                                           this,
                                           which == foreground ? "Foreground Color"
@@ -265,25 +157,9 @@ void MainWindow::OnPickColor(int which)
                                           QColorDialog::DontUseNativeDialog);
 
     // if user hit 'OK' button, change the color
-    if (aColor.isValid())
-    {
-       if(which == foreground)
-       {
-            foregroundColor = aColor;
-            penTool->setColor(foregroundColor);
-            lineTool->setColor(foregroundColor);
-            rectTool->setColor(foregroundColor);
-            if(rectTool->getFillMode() == foreground)
-                rectTool->setFillColor(foregroundColor);
-       }
-       else
-       {
-           backgroundColor = aColor;
-           eraserTool->setColor(backgroundColor);
-           if(rectTool->getFillMode() == background)
-               rectTool->setFillColor(backgroundColor);
-       }
-    }
+    if (color.isValid())
+        drawArea->updateColorConfig(color, which);
+
     // done with the dialog, free it
     delete colorDialog;
 }
@@ -294,15 +170,7 @@ void MainWindow::OnPickColor(int which)
  */
 void MainWindow::OnChangeTool(int newTool)
 {
-    switch(newTool)
-    {
-        case pen: currentTool = penTool;        break;
-        case line: currentTool = lineTool;      break;
-        case eraser: currentTool = eraserTool;  break;
-        case rect_tool: currentTool = rectTool; break;
-        default: break;
-    }
-    drawArea->setCurrentTool(currentTool); // notify observer
+    currentTool = drawArea->setCurrentTool(newTool); // notify observer
 }
 
 /**
@@ -313,7 +181,7 @@ void MainWindow::OnChangeTool(int newTool)
 void MainWindow::OnPenDialog()
 {
     if(!penDialog)
-        penDialog = new PenDialog(this);
+        penDialog = new PenDialog(this, drawArea);
 
     if(penDialog && penDialog->isVisible())
         return;
@@ -329,7 +197,7 @@ void MainWindow::OnPenDialog()
 void MainWindow::OnLineDialog()
 {
     if(!lineDialog)
-        lineDialog = new LineDialog(this);
+        lineDialog = new LineDialog(this, drawArea);
 
     if(lineDialog && lineDialog->isVisible())
         return;
@@ -345,7 +213,7 @@ void MainWindow::OnLineDialog()
 void MainWindow::OnEraserDialog()
 {
     if (!eraserDialog)
-        eraserDialog = new EraserDialog(this);
+        eraserDialog = new EraserDialog(this, drawArea);
 
     if(eraserDialog->isVisible())
         return;
@@ -361,131 +229,12 @@ void MainWindow::OnEraserDialog()
 void MainWindow::OnRectangleDialog()
 {
     if (!rectDialog)
-        rectDialog = new RectDialog(this);
+        rectDialog = new RectDialog(this, drawArea);
 
     if(rectDialog->isVisible())
         return;
 
     rectDialog->show();
-}
-
-void MainWindow::OnPenCapConfig(int capStyle)
-{
-    switch (capStyle)
-    {
-        case flat: penTool->setCapStyle(Qt::FlatCap);       break;
-        case square: penTool->setCapStyle(Qt::SquareCap);   break;
-        case round_cap: penTool->setCapStyle(Qt::RoundCap); break;
-        default:                                            break;
-    }
-}
-
-void MainWindow::OnPenSizeConfig(int value)
-{
-    penTool->setWidth(value);
-}
-
-void MainWindow::OnEraserConfig(int value)
-{
-    eraserTool->setWidth(value);
-}
-
-void MainWindow::OnLineStyleConfig(int lineStyle)
-{
-    switch (lineStyle)
-    {
-        case solid: lineTool->setStyle(Qt::SolidLine);                break;
-        case dashed: lineTool->setStyle(Qt::DashLine);                break;
-        case dotted: lineTool->setStyle(Qt::DotLine);                 break;
-        case dash_dotted: lineTool->setStyle(Qt::DashDotLine);        break;
-        case dash_dot_dotted: lineTool->setStyle(Qt::DashDotDotLine); break;
-        default:                                                      break;
-    }
-}
-
-void MainWindow::OnLineCapConfig(int capStyle)
-{
-    switch (capStyle)
-    {
-        case flat: lineTool->setCapStyle(Qt::FlatCap);       break;
-        case square: lineTool->setCapStyle(Qt::SquareCap);   break;
-        case round_cap: lineTool->setCapStyle(Qt::RoundCap); break;
-        default:                                             break;
-    }
-}
-
-void MainWindow::OnDrawTypeConfig(int drawType)
-{
-    switch (drawType)
-    {
-        case single: drawArea->setLineMode(single); break;
-        case poly:   drawArea->setLineMode(poly);   break;
-        default:     break;
-    }
-}
-
-void MainWindow::OnLineThicknessConfig(int value)
-{
-    lineTool->setWidth(value);
-}
-
-void MainWindow::OnRectBStyleConfig(int boundaryStyle)
-{
-    switch (boundaryStyle)
-    {
-        case solid: rectTool->setStyle(Qt::SolidLine);                break;
-        case dashed: rectTool->setStyle(Qt::DashLine);                break;
-        case dotted: rectTool->setStyle(Qt::DotLine);                 break;
-        case dash_dotted: rectTool->setStyle(Qt::DashDotLine);        break;
-        case dash_dot_dotted: rectTool->setStyle(Qt::DashDotDotLine); break;
-        default:                                                      break;
-    }
-}
-
-void MainWindow::OnRectShapeTypeConfig(int shape)
-{
-    switch (shape)
-    {
-        case rectangle: rectTool->setShapeType(rectangle);                 break;
-        case rounded_rectangle: rectTool->setShapeType(rounded_rectangle); break;
-        case ellipse: rectTool->setShapeType(ellipse);                     break;
-        default:                                                           break;
-    }
-}
-
-void MainWindow::OnRectFillConfig(int fillType)
-{
-    switch (fillType)
-    {
-        case foreground: rectTool->setFillMode(foreground);
-                         rectTool->setFillColor(foregroundColor);      break;
-        case background: rectTool->setFillMode(background);
-                         rectTool->setFillColor(backgroundColor);      break;
-        case no_fill: rectTool->setFillMode(no_fill);
-                      rectTool->setFillColor(QColor(Qt::transparent)); break;
-        default:                                                       break;
-    }
-}
-
-void MainWindow::OnRectBTypeConfig(int boundaryType)
-{
-    switch (boundaryType)
-    {
-        case miter_join: rectTool->setJoinStyle(Qt::MiterJoin);  break;
-        case bevel_join: rectTool->setJoinStyle(Qt::BevelJoin);  break;
-        case round_join: rectTool->setJoinStyle(Qt::RoundJoin);  break;
-        default:                                                 break;
-    }
-}
-
-void MainWindow::OnRectLineConfig(int value)
-{
-    rectTool->setWidth(value);
-}
-
-void MainWindow::OnRectCurveConfig(int value)
-{
-    rectTool->setCurve(value);
 }
 
 /**
@@ -505,18 +254,6 @@ void MainWindow::openToolDialog()
 }
 
 /**
- * @brief MainWindow::SaveDrawCommand - Put together a DrawCommand
- *                                  and save it on the undo/redo stack.
- *
- */
-void MainWindow::saveDrawCommand(QPixmap old_image)
-{
-    // put the old and new image on the stack for undo/redo
-    QUndoCommand *drawCommand = new DrawCommand(old_image, image);
-    undoStack->push(drawCommand);
-}
-
-/**
  * @brief MainWindow::createMenu - create and return a menu
  *
  */
@@ -531,9 +268,9 @@ void MainWindow::createMenu()
 
     // Edit
     QMenu* edit = new QMenu(tr("&Edit"), this);
-    edit->addAction("Undo", this, SLOT(OnUndo()), tr("Ctrl+Z"));
-    edit->addAction("Redo", this, SLOT(OnRedo()), tr("Ctrl+Y"));
-    edit->addAction("Clear Canvas", this, SLOT(OnClearAll()), tr("Ctrl+C"));
+    edit->addAction("Undo", drawArea, SLOT(OnUndo()), tr("Ctrl+Z"));
+    edit->addAction("Redo", drawArea, SLOT(OnRedo()), tr("Ctrl+Y"));
+    edit->addAction("Clear Canvas", drawArea, SLOT(OnClearAll()), tr("Ctrl+C"));
     edit->addAction("Resize Image...", this, SLOT(OnResizeImage()), tr("Ctrl+R"));
 
     // color pickers (still under Edit)

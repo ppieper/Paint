@@ -1,5 +1,6 @@
 #include "dialog_windows.h"
 #include "main_window.h"
+#include "draw_area.h"
 
 
 /**
@@ -59,12 +60,13 @@ QGroupBox* CanvasSizeDialog::createSpinBoxes(int width, int height)
  * @brief PenDialog::PenDialog - Dialogue for selecting pen size and cap style
  *
  */
-PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
+PenDialog::PenDialog(QWidget* parent, DrawArea* drawArea,
+                                      CapStyle capStyle, int size)
     :QDialog(parent)
 {
     setWindowTitle(tr("Pen Dialog"));
 
-    mainWindow = (MainWindow*)this->parent();
+    this->drawArea = drawArea;
 
     QLabel *penSizeLabel = new QLabel(tr("Pen Size"), this);
     penSizeSlider = new QSlider(Qt::Horizontal, this);
@@ -73,7 +75,7 @@ PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
     penSizeSlider->setSliderPosition(size);
     penSizeSlider->setTracking(false);
     connect(penSizeSlider, SIGNAL(valueChanged(int)),
-            mainWindow, SLOT(OnPenSizeConfig(int)));
+            drawArea, SLOT(OnPenSizeConfig(int)));
 
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->addWidget(createCapStyle(capStyle));
@@ -89,15 +91,13 @@ QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
     QRadioButton *squareButton = new QRadioButton(tr("Square"), this);
     QRadioButton *roundButton = new QRadioButton(tr("Round"), this);
 
-    mainWindow = (MainWindow*)this->parent();
-
     capStyleG = new QButtonGroup(this);
     capStyleG->addButton(flatButton, 0);
     capStyleG->addButton(squareButton, 1);
     capStyleG->addButton(roundButton, 2);
 
     connect(capStyleG, SIGNAL(buttonClicked(int)),
-            mainWindow, SLOT(OnPenCapConfig(int)));
+            drawArea, SLOT(OnPenCapConfig(int)));
 
     switch(capStyle)
     {
@@ -121,7 +121,8 @@ QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
  *                                     line to draw
  *
  */
-LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
+LineDialog::LineDialog(QWidget* parent, DrawArea* drawArea,
+                                        LineStyle lineStyle,
                                         CapStyle capStyle,
                                         DrawType drawType,
                                         int thickness)
@@ -131,7 +132,7 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
 
     QGroupBox*left = new QGroupBox(this);
 
-    mainWindow = (MainWindow*)this->parent();
+    this->drawArea = drawArea;
 
     QVBoxLayout *vboxL = new QVBoxLayout(this);
     vboxL->addWidget(createLineStyle(lineStyle));
@@ -150,7 +151,7 @@ LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
     lineThicknessSlider->setMaximum(MAX_PEN_SIZE);
     lineThicknessSlider->setSliderPosition(thickness);
     lineThicknessSlider->setTracking(false);
-    connect(lineThicknessSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnLineThicknessConfig(int)));
+    connect(lineThicknessSlider, SIGNAL(valueChanged(int)), drawArea, SLOT(OnLineThicknessConfig(int)));
 
     QGridLayout *grid = new QGridLayout(this);
     grid->addWidget(left, 0,0);
@@ -176,7 +177,7 @@ QGroupBox* LineDialog::createLineStyle(LineStyle lineStyle)
     lineStyleG->addButton(dashDottedButton, 3);
     lineStyleG->addButton(dashDotDottedButton, 4);
 
-    connect(lineStyleG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnLineStyleConfig(int)));
+    connect(lineStyleG, SIGNAL(buttonClicked(int)), drawArea, SLOT(OnLineStyleConfig(int)));
 
     switch(lineStyle)
     {
@@ -211,7 +212,7 @@ QGroupBox* LineDialog::createCapStyle(CapStyle capStyle)
     capStyleG->addButton(squareButton, 1);
     capStyleG->addButton(roundButton, 2);
 
-    connect(capStyleG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnLineCapConfig(int)));
+    connect(capStyleG, SIGNAL(buttonClicked(int)), drawArea, SLOT(OnLineCapConfig(int)));
 
     switch(capStyle)
     {
@@ -240,7 +241,7 @@ QGroupBox* LineDialog::createDrawType(DrawType drawType)
     drawTypeG->addButton(singleButton, 0);
     drawTypeG->addButton(polyButton, 1);
 
-    connect(drawTypeG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnDrawTypeConfig(int)));
+    connect(drawTypeG, SIGNAL(buttonClicked(int)), drawArea, SLOT(OnDrawTypeConfig(int)));
 
     switch(drawType)
     {
@@ -261,12 +262,12 @@ QGroupBox* LineDialog::createDrawType(DrawType drawType)
  * @brief EraserDialog::EraserDialog - Dialogue for choosing eraser thickness.
  *
  */
-EraserDialog::EraserDialog(QWidget* parent, int thickness)
+EraserDialog::EraserDialog(QWidget* parent, DrawArea* drawArea, int thickness)
     :QDialog(parent)
 {
     setWindowTitle(tr("Eraser Dialog"));
 
-    MainWindow* mainWindow = (MainWindow*)this->parent();
+    this->drawArea = drawArea;
 
     QLabel *eraserThicknessLabel = new QLabel(tr("Eraser Thickness"), this);
     eraserThicknessSlider = new QSlider(Qt::Horizontal, this);
@@ -274,7 +275,7 @@ EraserDialog::EraserDialog(QWidget* parent, int thickness)
     eraserThicknessSlider->setMaximum(MAX_PEN_SIZE);
     eraserThicknessSlider->setSliderPosition(thickness);
     eraserThicknessSlider->setTracking(false);
-    connect(eraserThicknessSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnEraserConfig(int)));
+    connect(eraserThicknessSlider, SIGNAL(valueChanged(int)), drawArea, SLOT(OnEraserConfig(int)));
 
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->addWidget(eraserThicknessLabel);
@@ -286,14 +287,15 @@ EraserDialog::EraserDialog(QWidget* parent, int thickness)
  * @brief RectDialog::RectDialog - Dialogue for selecting what kind of rectangle to draw.
  *
  */
-RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shapeType,
+RectDialog::RectDialog(QWidget* parent, DrawArea* drawArea,
+                                        LineStyle boundaryStyle, ShapeType shapeType,
                                         FillColor fillColor, BoundaryType boundaryType,
                                         int thickness, int curve)
     :QDialog(parent)
 {
     setWindowTitle(tr("Rectangle Dialog"));
 
-    mainWindow = (MainWindow*)this->parent();
+    this->drawArea = drawArea;
 
     QGroupBox*left = new QGroupBox(this);
 
@@ -316,7 +318,7 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     lineThicknessSlider->setSliderPosition(thickness);
     lineThicknessSlider->setTracking(false);
 
-    connect(lineThicknessSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnRectLineConfig(int)));
+    connect(lineThicknessSlider, SIGNAL(valueChanged(int)), drawArea, SLOT(OnRectLineConfig(int)));
 
     QLabel *rRectCurveLabel = new QLabel(tr("Rounded Rectangle Curve"), this);
     rRectCurveSlider = new QSlider(Qt::Horizontal, this);
@@ -325,7 +327,7 @@ RectDialog::RectDialog(QWidget* parent, LineStyle boundaryStyle, ShapeType shape
     rRectCurveSlider->setSliderPosition(curve);
     rRectCurveSlider->setTracking(false);
 
-    connect(rRectCurveSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnRectCurveConfig(int)));
+    connect(rRectCurveSlider, SIGNAL(valueChanged(int)), drawArea, SLOT(OnRectCurveConfig(int)));
 
     QGridLayout *grid = new QGridLayout(this);
     grid->addWidget(left, 0,0);
@@ -353,7 +355,7 @@ QGroupBox* RectDialog::createBoundaryStyle(LineStyle boundaryStyle)
     boundaryStyleG->addButton(dashDottedButton, 3);
     boundaryStyleG->addButton(dashDotDottedButton, 4);
 
-    connect(boundaryStyleG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectBStyleConfig(int)));
+    connect(boundaryStyleG, SIGNAL(buttonClicked(int)), drawArea, SLOT(OnRectBStyleConfig(int)));
 
     switch(boundaryStyle)
     {
@@ -388,7 +390,7 @@ QGroupBox* RectDialog::createShapeType(ShapeType shapeType)
     shapeTypeG->addButton(rRectangleButton, 1);
     shapeTypeG->addButton(ellipseButton, 2);
 
-    connect(shapeTypeG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectShapeTypeConfig(int)));
+    connect(shapeTypeG, SIGNAL(buttonClicked(int)), drawArea, SLOT(OnRectShapeTypeConfig(int)));
 
     switch(shapeType)
     {
@@ -419,7 +421,7 @@ QGroupBox* RectDialog::createFillColor(FillColor fillColor)
     fillColorG->addButton(backgroundButton, 1);
     fillColorG->addButton(noFillButton, 2);
 
-    connect(fillColorG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectFillConfig(int)));
+    connect(fillColorG, SIGNAL(buttonClicked(int)), drawArea, SLOT(OnRectFillConfig(int)));
 
     switch(fillColor)
     {
@@ -450,7 +452,7 @@ QGroupBox* RectDialog::createBoundaryType(BoundaryType boundaryType)
     boundaryTypeG->addButton(bevelJoinButton, 1);
     boundaryTypeG->addButton(roundJoinButton, 2);
 
-    connect(boundaryTypeG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnRectBTypeConfig(int)));
+    connect(boundaryTypeG, SIGNAL(buttonClicked(int)), drawArea, SLOT(OnRectBTypeConfig(int)));
 
     switch(boundaryType)
     {

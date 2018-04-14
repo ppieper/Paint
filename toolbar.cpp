@@ -1,13 +1,16 @@
 #include "main_window.h"
+#include "draw_area.h"
 
 
 /**
  * @brief ToolBar::ToolBar - Wrapper class for QToolBar.
  *                           construct a ToolBar with icons & actions.
  */
-ToolBar::ToolBar(QWidget *parent)
+ToolBar::ToolBar(QWidget *parent, DrawArea* drawArea)
     : QToolBar(parent)
 {
+    this->drawArea = drawArea;
+
     // make sure we can't move or hide the toolbar
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setContextMenuPolicy(Qt::PreventContextMenu);
@@ -49,16 +52,16 @@ void ToolBar::createActions()
     connect(save_action, &QAction::triggered, mainWindow, &MainWindow::OnSaveImage);
 
     QAction *clear_action = new QAction(clear_icon, "Clear", this);
-    connect(clear_action, &QAction::triggered, mainWindow, &MainWindow::OnClearAll);
+    connect(clear_action, &QAction::triggered, drawArea, &DrawArea::OnClearAll);
 
     QAction *resize_action = new QAction(resize_icon, "Resize", this);
     connect(resize_action, &QAction::triggered, mainWindow, &MainWindow::OnResizeImage);
 
     QAction *undo_action = new QAction(undo_icon, "Undo", this);
-    connect(undo_action, &QAction::triggered, mainWindow, &MainWindow::OnUndo);
+    connect(undo_action, &QAction::triggered, drawArea, &DrawArea::OnUndo);
 
     QAction *redo_action = new QAction(redo_icon, "Redo", this);
-    connect(redo_action, &QAction::triggered, mainWindow, &MainWindow::OnRedo);
+    connect(redo_action, &QAction::triggered, drawArea, &DrawArea::OnRedo);
 
     // color pickers
     QSignalMapper *signalMapperC = new QSignalMapper(this);

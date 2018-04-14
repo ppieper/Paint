@@ -16,17 +16,11 @@ public:
     /** mouse event handler */
     void virtual mousePressEvent (QMouseEvent *) override;
 
-    /** save a command to the undo stack */
-    void saveDrawCommand(QPixmap);
-
 public slots:
     /** toolbar actions */
     void OnNewImage();
 	void OnLoadImage();
     void OnSaveImage();
-    void OnUndo();
-    void OnRedo();
-    void OnClearAll();
     void OnResizeImage();
     void OnPickColor(int);
     void OnChangeTool(int);
@@ -35,24 +29,6 @@ public slots:
     void OnLineDialog();
     void OnEraserDialog();
     void OnRectangleDialog();
-    /** pen tool */
-    void OnPenCapConfig(int);
-    void OnPenSizeConfig(int);
-    /** eraser tool */
-    void OnEraserConfig(int);
-    /** line tool */
-    void OnLineStyleConfig(int);
-    void OnLineCapConfig(int);
-    void OnDrawTypeConfig(int);
-    void OnLineThicknessConfig(int);
-
-    /** rect tool */
-    void OnRectBStyleConfig(int);
-    void OnRectShapeTypeConfig(int);
-    void OnRectFillConfig(int);
-    void OnRectBTypeConfig(int);
-    void OnRectLineConfig(int);
-    void OnRectCurveConfig(int);
 
 private:
     void createMenu();
@@ -60,28 +36,14 @@ private:
     /** tool dialog dispatcher */
     void openToolDialog();
 
-    /** undo stack */
-    QUndoStack* undoStack;
-
     /** the paintArea */
     DrawArea* drawArea;
 
     /** Main toolbar */
     ToolBar* toolbar;
 
-    /** the image */
-    QPixmap* image;
-
-    /** background/foreground color */
-    QColor foregroundColor;
-    QColor backgroundColor;
-
-    /** tools */
+    /** current tool */
     Tool* currentTool;
-    PenTool* penTool;
-    LineTool* lineTool;
-    EraserTool* eraserTool;
-    RectTool* rectTool;
 
     /** dialog pointers - init to 0 */
     PenDialog* penDialog = 0;

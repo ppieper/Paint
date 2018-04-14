@@ -21,6 +21,9 @@ const int MAX_IMG_WIDTH = 9999; // probably too high for a QPixmap
 const int MIN_IMG_HEIGHT = 1;
 const int MAX_IMG_HEIGHT = 9999;
 
+/** max number of undo commands */
+const int UNDO_LIMIT = 100;
+
 enum ToolType {pen, line, eraser, rect_tool};
 enum LineStyle {solid, dashed, dotted, dash_dotted, dash_dot_dotted};
 enum CapStyle {flat, square, round_cap};
