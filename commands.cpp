@@ -1,12 +1,13 @@
 #include "commands.h"
-#include <QtWidgets>
+#include "qrect.h"
 
 
 /**
  * @brief DrawCommand::DrawCommand - A command that keeps a copy of the image
- *                                   before and after something is drawn.
+ *                                   before and after something is drawn
  */
-DrawCommand::DrawCommand(const QPixmap &oldImage, QPixmap *image, QUndoCommand *parent)
+DrawCommand::DrawCommand(const QPixmap &oldImage, QPixmap *image,
+                               QUndoCommand *parent)
     : QUndoCommand(parent)
 {
     this->image = image;
@@ -15,7 +16,7 @@ DrawCommand::DrawCommand(const QPixmap &oldImage, QPixmap *image, QUndoCommand *
 }
 
 /**
- * @brief DrawCommand::undo - Undo a draw command, restoring the old image.
+ * @brief DrawCommand::undo - Undo a draw command, restoring the old image
  */
 void DrawCommand::undo()
 {
@@ -23,7 +24,7 @@ void DrawCommand::undo()
 }
 
 /**
- * @brief TDrawCommand::redo - 'Undo' an undo, restoring the new image.
+ * @brief TDrawCommand::redo - 'Undo' an undo, restoring the new image
  */
 void DrawCommand::redo()
 {

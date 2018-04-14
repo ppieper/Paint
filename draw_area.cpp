@@ -12,7 +12,8 @@
  */
 DrawArea::DrawArea(QWidget *parent, QPixmap *image,
                      QPen *penTool, QPen *lineTool,
-                     QPen *eraserTool, QPen *rectTool)
+                     QPen *eraserTool, QPen *rectTool,
+                     Tool* currentTool)
     : QWidget(parent)
 {
     // initialize image and tools
@@ -21,14 +22,20 @@ DrawArea::DrawArea(QWidget *parent, QPixmap *image,
     this->lineTool = lineTool;
     this->eraserTool = eraserTool;
     this->rectTool = rectTool;
+    this->currentTool = currentTool;
 
+    // get the reference to the main window
     mainWindow = (MainWindow*)this->parent();
 
     // default tool
     currentTool = (Tool*) penTool;
 
+    // initialize state variables
     drawing = false;
     drawingPoly = false;
+    currentLineMode = single;
+
+    // small optimizations
     setAttribute(Qt::WA_OpaquePaintEvent);
     setAttribute(Qt::WA_StaticContents);
 }

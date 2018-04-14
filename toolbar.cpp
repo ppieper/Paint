@@ -22,19 +22,19 @@ ToolBar::ToolBar(QWidget *parent)
 void ToolBar::createActions()
 {
     // load button icons from files
-    QIcon new_icon("icons/new_icon.png");
-    QIcon open_icon("icons/open_icon.png");
-    QIcon save_icon("icons/save_icon.png");
-    QIcon undo_icon("icons/undo_icon.png");
-    QIcon redo_icon("icons/redo_icon.png");
-    QIcon clear_icon("icons/clearall_icon.png");
-    QIcon resize_icon("icons/resize_icon.png");
-    QIcon fcolor_icon("icons/fcolor_icon.png");
-    QIcon bcolor_icon("icons/bcolor_icon.png");
-    QIcon pen_icon("icons/pen_icon.png");
-    QIcon line_icon("icons/line_icon.png");
-    QIcon eraser_icon("icons/eraser_icon.png");
-    QIcon rect_icon("icons/rect_icon.png");
+    QIcon new_icon(":/icons/newIcon");
+    QIcon open_icon(":/icons/openIcon");
+    QIcon save_icon(":/icons/saveIcon");
+    QIcon undo_icon(":/icons/undoIcon");
+    QIcon redo_icon(":/icons/redoIcon");
+    QIcon clear_icon(":/icons/clearAllIcon");
+    QIcon resize_icon(":/icons/resizeIcon");
+    QIcon fcolor_icon(":/icons/fColorIcon");
+    QIcon bcolor_icon(":/icons/bColorIcon");
+    QIcon pen_icon(":/icons/penIcon");
+    QIcon line_icon(":/icons/lineIcon");
+    QIcon eraser_icon(":/icons/eraserIcon");
+    QIcon rect_icon(":/icons/rectIcon");
 
     MainWindow* mainWindow = (MainWindow*)this->parent();
 

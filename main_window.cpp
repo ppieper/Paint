@@ -7,7 +7,8 @@ using namespace std;
 
 
 /**
- * @brief MainWindow::MainWindow - the main window, parent to every other widget.
+ * @brief MainWindow::MainWindow - the main window, parent to every other
+ *                                 widget.
  */
 MainWindow::MainWindow(QWidget* parent, const char* name)
     :QMainWindow(parent)
@@ -19,7 +20,7 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     toolbar = new ToolBar(this);
     addToolBar(toolbar);
 
-    // create the menu
+    // create the menu (needs toolbar to be created first!)
     createMenu();
 
     //create the image
@@ -30,23 +31,27 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     backgroundColor = Qt::white;
 
     // initialize tools
-    penTool = new PenTool(QBrush(Qt::black),1,Qt::SolidLine,Qt::RoundCap,image);
-    lineTool = new LineTool(QBrush(Qt::black),1,Qt::SolidLine, Qt::RoundCap,image);
-    eraserTool = new EraserTool(QBrush(Qt::white),10,Qt::SolidLine,Qt::RoundCap,image);
-    rectTool = new RectTool(QBrush(Qt::black),1,Qt::SolidLine,Qt::RoundCap,image);
+    penTool = new PenTool(QBrush(Qt::black),1,Qt::SolidLine,
+                          Qt::RoundCap,image);
+    lineTool = new LineTool(QBrush(Qt::black),1,Qt::SolidLine,
+                            Qt::RoundCap,image);
+    eraserTool = new EraserTool(QBrush(Qt::white),10,Qt::SolidLine,
+                                Qt::RoundCap,image);
+    rectTool = new RectTool(QBrush(Qt::black),1,Qt::SolidLine,Qt::
+                            RoundCap,image);
 
-    // default tool
+    // set default tool
     currentTool = penTool;
+
+    // create the DrawArea, which will receive the draw mouse events
+    drawArea = new DrawArea(this, image, penTool, lineTool,
+                                  eraserTool, rectTool, currentTool);
+    drawArea->setStyleSheet("background-color:rgba(0,0,0,0)");
 
     // adjust window size, name, & stop context menu
     setWindowTitle(name);
     resize(QDesktopWidget().availableGeometry(this).size()*.6);
     setContextMenuPolicy(Qt::PreventContextMenu);
-
-    drawArea = new DrawArea(this, image, penTool, lineTool,
-                                  eraserTool, rectTool);
-    drawArea->setStyleSheet("background-color:rgba(0,0,0,0)");
-    drawArea->setCurrentTool(currentTool);
     setCentralWidget(drawArea);
 }
 
@@ -57,6 +62,10 @@ MainWindow::~MainWindow()
     delete lineTool;
     delete eraserTool;
     delete rectTool;
+    delete penDialog;
+    delete lineDialog;
+    delete rectDialog;
+    delete eraserDialog;
 }
 
 /**
@@ -72,8 +81,8 @@ void MainWindow::mousePressEvent(QMouseEvent *e)
 }
 
 /**
- * @brief MainWindow::OnNewImage - Open a NewCanvasDialogue prompting user to enter
- *                                  the dimensions for a new image.
+ * @brief MainWindow::OnNewImage - Open a NewCanvasDialogue prompting user to
+ *                                 enterthe dimensions for a new image.
  */
 void MainWindow::OnNewImage()
 {
@@ -105,7 +114,7 @@ void MainWindow::OnNewImage()
 void MainWindow::OnLoadImage()
 {
     QString s = QFileDialog::getOpenFileName(this, tr("Open File"),
-                                                    "",
+                                                    ".",
                                                     tr("BMP image (*.bmp)"));
 	if (! s.isNull())
 	{
@@ -121,17 +130,18 @@ void MainWindow::OnLoadImage()
 }
 
 /**
- * @brief MainWindow::OnSaveImage - Open a QFileDialogue prompting user to enter
- *                                  a filename and save location.
+ * @brief MainWindow::OnSaveImage - Open a QFileDialogue prompting user to
+ *                                  enter a filename and save location.
  */
 void MainWindow::OnSaveImage()
 {
     if(image->isNull())
         return;
 
-    // appending suffixes doesn't work on native version, so use QT's instead
+    // use custom dialog settings for appending suffixes
     QFileDialog *fileDialog = new QFileDialog(this);
     fileDialog->setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog->setDirectory(".");
     fileDialog->setNameFilter("BMP image (*.bmp)");
     fileDialog->setDefaultSuffix("bmp");
     fileDialog->exec();
@@ -211,7 +221,8 @@ void MainWindow::OnResizeImage()
         return;
 
     CanvasSizeDialog* newCanvas = new CanvasSizeDialog(this, "Resize Image",
-                                                       image->width(), image->height());
+                                                       image->width(),
+                                                       image->height());
     newCanvas->exec();
     // if user hit 'OK' button, create new image
     if (newCanvas->result())
@@ -223,11 +234,11 @@ void MainWindow::OnResizeImage()
         int width = newCanvas->getWidthValue();
         int height = newCanvas->getHeightValue();
 
-        // no change
+        // if no change, do nothing
         if(image->size() == QSize(width, height))
             return;
 
-        // re-scale the image
+        // else re-scale the image
         *image = image->scaled(QSize(width,height), Qt::IgnoreAspectRatio);
 
         // get the area to be modified (for updating the widget)
@@ -247,7 +258,8 @@ void MainWindow::OnResizeImage()
 }
 
 /**
- * @brief MainWindow::OnPickColor - Open a QColorDialog prompting the user to select a color.
+ * @brief MainWindow::OnPickColor - Open a QColorDialog prompting the user to
+ *                                  select a color.
  *
  */
 void MainWindow::OnPickColor(int which)
@@ -268,6 +280,7 @@ void MainWindow::OnPickColor(int which)
             foregroundColor = aColor;
             penTool->setColor(foregroundColor);
             lineTool->setColor(foregroundColor);
+            rectTool->setColor(foregroundColor);
             if(rectTool->getFillMode() == foreground)
                 rectTool->setFillColor(foregroundColor);
        }
@@ -291,7 +304,7 @@ void MainWindow::OnChangeTool(int newTool)
 {
     switch(newTool)
     {
-        case pen: currentTool = penTool;         break;
+        case pen: currentTool = penTool;        break;
         case line: currentTool = lineTool;      break;
         case eraser: currentTool = eraserTool;  break;
         case rect_tool: currentTool = rectTool; break;
@@ -301,7 +314,8 @@ void MainWindow::OnChangeTool(int newTool)
 }
 
 /**
- * @brief MainWindow::OnPenDialog - Open a PenDialog prompting the user to change pen settings.
+ * @brief MainWindow::OnPenDialog - Open a PenDialog prompting the user to
+ *                                  change pen settings.
  *
  */
 void MainWindow::OnPenDialog()
@@ -316,7 +330,8 @@ void MainWindow::OnPenDialog()
 }
 
 /**
- * @brief MainWindow::OnLineDialog - Open a LineDialog prompting the user to change line tool settings.
+ * @brief MainWindow::OnLineDialog - Open a LineDialog prompting the user to
+ *                                   change line tool settings.
  *
  */
 void MainWindow::OnLineDialog()
@@ -331,7 +346,8 @@ void MainWindow::OnLineDialog()
 }
 
 /**
- * @brief MainWindow::OnEraserDialog - Open a EraserDialog prompting the user to change eraser settings.
+ * @brief MainWindow::OnEraserDialog - Open a EraserDialog prompting the user
+ *                                     to change eraser settings.
  *
  */
 void MainWindow::OnEraserDialog()
@@ -346,7 +362,8 @@ void MainWindow::OnEraserDialog()
 }
 
 /**
- * @brief MainWindow::OnRectangleDialog - Open a RectDialog prompting the user to change rect tool settings.
+ * @brief MainWindow::OnRectangleDialog - Open a RectDialog prompting the user
+ *                                        to change rect tool settings.
  *
  */
 void MainWindow::OnRectangleDialog()
@@ -480,7 +497,8 @@ void MainWindow::OnRectCurveConfig(int value)
 }
 
 /**
- * @brief MainWindow::openToolDialog - call the appropriate dialog function based on the current tool.
+ * @brief MainWindow::openToolDialog - call the appropriate dialog function
+ *                                     based on the current tool.
  *
  */
 void MainWindow::openToolDialog()

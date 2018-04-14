@@ -3,9 +3,8 @@
 
 
 /**
- * @brief CanvasSizeDialog::CanvasSizeDialog - Dialogue for creating a new canvas.
- *                                             Construct a dialog box containing
- *                                             QSpinBoxes and QPushButtons for this.
+ * @brief CanvasSizeDialog::CanvasSizeDialog - Dialogue for creating a new
+ *                                             canvas
  */
 CanvasSizeDialog::CanvasSizeDialog(QWidget* parent, const char* name, int width, int height)
     :QDialog(parent)
@@ -20,7 +19,7 @@ CanvasSizeDialog::CanvasSizeDialog(QWidget* parent, const char* name, int width,
 
 /**
  * @brief NewCanvasDialog::createSpinBoxes - Create the QSpinBoxes for the dialog
- *                                           box as well as the buttons.
+ *                                           box as well as the buttons
  */
 void CanvasSizeDialog::createSpinBoxes(int width, int height)
 {
@@ -41,8 +40,8 @@ void CanvasSizeDialog::createSpinBoxes(int width, int height)
     heightSpinBox->setSuffix("px");
 
     // the buttons
-    QPushButton *okButton = new QPushButton("OK", this);
-    QPushButton *cancelButton = new QPushButton("Cancel", this);
+    QPushButton *okButton = new QPushButton(tr("OK"), this);
+    QPushButton *cancelButton = new QPushButton(tr("Cancel"), this);
     connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
     connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 
@@ -56,27 +55,7 @@ void CanvasSizeDialog::createSpinBoxes(int width, int height)
 }
 
 /**
- * @brief NewCanvasDialog::getWidthValue
- *
- * @return the width selected by the user
- */
-int CanvasSizeDialog::getWidthValue() const
-{
-    return widthSpinBox->value();
-}
-
-/**
- * @brief NewCanvasDialog::getHeightValue
- *
- * @return the height selected by the user
- */
-int CanvasSizeDialog::getHeightValue() const
-{
-    return heightSpinBox->value();
-}
-
-/**
- * @brief PenDialog::PenDialog - Dialogue for selecting pen size and cap style.
+ * @brief PenDialog::PenDialog - Dialogue for selecting pen size and cap style
  *
  */
 PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
@@ -92,7 +71,8 @@ PenDialog::PenDialog(QWidget* parent, CapStyle capStyle, int size)
     penSizeSlider->setMaximum(MAX_PEN_SIZE);
     penSizeSlider->setSliderPosition(size);
     penSizeSlider->setTracking(false);
-    connect(penSizeSlider, SIGNAL(valueChanged(int)), mainWindow, SLOT(OnPenSizeConfig(int)));
+    connect(penSizeSlider, SIGNAL(valueChanged(int)),
+            mainWindow, SLOT(OnPenSizeConfig(int)));
 
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->addWidget(createCapStyle(capStyle));
@@ -115,14 +95,15 @@ QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
     capStyleG->addButton(squareButton, 1);
     capStyleG->addButton(roundButton, 2);
 
-    connect(capStyleG, SIGNAL(buttonClicked(int)), mainWindow, SLOT(OnPenCapConfig(int)));
+    connect(capStyleG, SIGNAL(buttonClicked(int)),
+            mainWindow, SLOT(OnPenCapConfig(int)));
 
     switch(capStyle)
     {
         case flat: flatButton->setChecked(true);       break;
         case square: squareButton->setChecked(true);   break;
         case round_cap: roundButton->setChecked(true); break;
-    default: break;
+        default:                                       break;
     }
 
     QHBoxLayout *hbox = new QHBoxLayout();
@@ -135,7 +116,8 @@ QGroupBox* PenDialog::createCapStyle(CapStyle capStyle)
 }
 
 /**
- * @brief LineDialog::LineSizeDialog - Dialogue for selecting what kind of line to draw.
+ * @brief LineDialog::LineSizeDialog - Dialogue for selecting what kind of
+ *                                     line to draw
  *
  */
 LineDialog::LineDialog(QWidget* parent, LineStyle lineStyle,
@@ -202,7 +184,7 @@ QGroupBox* LineDialog::createLineStyle(LineStyle lineStyle)
         case dotted: dottedButton->setChecked(true);                 break;
         case dash_dotted: dashDottedButton->setChecked(true);        break;
         case dash_dot_dotted: dashDotDottedButton->setChecked(true); break;
-    default: break;
+        default:                                                     break;
     }
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -235,7 +217,7 @@ QGroupBox* LineDialog::createCapStyle(CapStyle capStyle)
         case flat: flatButton->setChecked(true);       break;
         case square: squareButton->setChecked(true);   break;
         case round_cap: roundButton->setChecked(true); break;
-    default: break;
+        default:                                       break;
     }
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -263,7 +245,7 @@ QGroupBox* LineDialog::createDrawType(DrawType drawType)
     {
         case single: singleButton->setChecked(true); break;
         case poly: polyButton->setChecked(true);     break;
-    default: break;
+        default:                                     break;
     }
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -377,7 +359,7 @@ QGroupBox* RectDialog::createBoundaryStyle(LineStyle boundaryStyle)
         case dotted: dottedButton->setChecked(true);                 break;
         case dash_dotted: dashDottedButton->setChecked(true);        break;
         case dash_dot_dotted: dashDotDottedButton->setChecked(true); break;
-        default: break;
+        default:                                                     break;
     }
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -410,7 +392,7 @@ QGroupBox* RectDialog::createShapeType(ShapeType shapeType)
         case rectangle: rectangleButton->setChecked(true);          break;
         case rounded_rectangle: rRectangleButton->setChecked(true); break;
         case ellipse: ellipseButton->setChecked(true);              break;
-        default: break;
+        default:                                                    break;
     }
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -441,7 +423,7 @@ QGroupBox* RectDialog::createFillColor(FillColor fillColor)
         case foreground: foregroundButton->setChecked(true); break;
         case background: backgroundButton->setChecked(true); break;
         case no_fill: noFillButton->setChecked(true);        break;
-    default: break;
+        default:                                             break;
     }
 
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -472,7 +454,7 @@ QGroupBox* RectDialog::createBoundaryType(BoundaryType boundaryType)
         case miter_join: miterJoinButton->setChecked(true); break;
         case bevel_join: bevelJoinButton->setChecked(true); break;
         case round_join: roundJoinButton->setChecked(true); break;
-    default: break;
+        default:                                            break;
     }
 
     QVBoxLayout *vbox = new QVBoxLayout();

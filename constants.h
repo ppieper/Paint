@@ -2,12 +2,14 @@
 #define CONSTANTS_H
 
 
+/** defaults */
 const int DEFAULT_IMG_WIDTH = 640;
 const int DEFAULT_IMG_HEIGHT = 480;
 const int DEFAULT_PEN_THICKNESS = 1;
 const int DEFAULT_ERASER_THICKNESS = 10;
 const int DEFAULT_RECT_CURVE = 10;
 
+/** slider ranges */
 const int MIN_PEN_SIZE = 1;
 const int MAX_PEN_SIZE = 50;
 const int MIN_RECT_CURVE = 0;

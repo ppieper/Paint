@@ -18,8 +18,8 @@ public:
                      int width = DEFAULT_IMG_WIDTH,
                      int height = DEFAULT_IMG_HEIGHT);
 
-    int getWidthValue() const;
-    int getHeightValue() const;
+    int getWidthValue() const { return widthSpinBox->value(); }
+    int getHeightValue() const { return heightSpinBox->value(); }
 
 private:
     void createSpinBoxes(int,int);
