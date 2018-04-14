@@ -11,6 +11,10 @@ public:
 
 private:
     void createActions();
+
+    /** Don't allow copying */
+    ToolBar(const ToolBar&);
+    ToolBar& operator=(const ToolBar&);
 };
 
 #endif // TOOLBAR_H

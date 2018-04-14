@@ -523,14 +523,14 @@ void MainWindow::saveDrawCommand(QPixmap old_image)
 void MainWindow::createMenu()
 {
     // File
-    QMenu* file = new QMenu("File", this);
+    QMenu* file = new QMenu(tr("&File"), this);
     file->addAction("New image...", this, SLOT(OnNewImage()), tr("Ctrl+N"));
     file->addAction("Load image...", this, SLOT(OnLoadImage()), tr("Ctrl+O"));
     file->addAction("Save image...", this, SLOT(OnSaveImage()), tr("Ctrl+S"));
     file->addAction("Quit", this, SLOT(close()), tr("Ctrl+Q"));
 
     // Edit
-    QMenu* edit = new QMenu("Edit", this);
+    QMenu* edit = new QMenu(tr("&Edit"), this);
     edit->addAction("Undo", this, SLOT(OnUndo()), tr("Ctrl+Z"));
     edit->addAction("Redo", this, SLOT(OnRedo()), tr("Ctrl+Y"));
     edit->addAction("Clear Canvas", this, SLOT(OnClearAll()), tr("Ctrl+C"));
@@ -539,11 +539,11 @@ void MainWindow::createMenu()
     // color pickers (still under Edit)
     QSignalMapper *signalMapper = new QSignalMapper(this);
 
-    QAction *fcolor_action = new QAction("Foreground Color...", this);
+    QAction *fcolor_action = new QAction(tr("Foreground Color..."), this);
     connect(fcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
     fcolor_action->setShortcut(tr("Ctrl+F"));
 
-    QAction *bcolor_action = new QAction("Background Color...", this);
+    QAction *bcolor_action = new QAction(tr("Background Color..."), this);
     connect(bcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
     bcolor_action->setShortcut(tr("Ctrl+B"));
 
@@ -556,16 +556,16 @@ void MainWindow::createMenu()
     edit->addAction(bcolor_action);
 
     // Tools
-    QMenu* tools = new QMenu("Tools", this);
+    QMenu* tools = new QMenu(tr("&Tools"), this);
     tools->addAction("Pen Properties...", this, SLOT(OnPenDialog()));
     tools->addAction("Line Properties...", this, SLOT(OnLineDialog()));
     tools->addAction("Eraser Properties...", this, SLOT(OnEraserDialog()));
     tools->addAction("Rectangle Properties...", this, SLOT(OnRectangleDialog()));
 
     // View
-    QMenu* view = new QMenu("View", this);
+    QMenu* view = new QMenu(tr("&View"), this);
     QAction *toggleToolbar = toolbar->toggleViewAction();
-    toggleToolbar->setText("Show Toolbar");
+    toggleToolbar->setText(tr("Show &Toolbar"));
     toggleToolbar->setShortcut(tr("Ctrl+T"));
 
     view->addAction(toggleToolbar);

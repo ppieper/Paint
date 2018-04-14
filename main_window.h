@@ -88,6 +88,10 @@ private:
     LineDialog* lineDialog = 0;
     EraserDialog* eraserDialog = 0;
     RectDialog* rectDialog = 0;
+
+    /** Don't allow copying */
+    MainWindow(const MainWindow&);
+    MainWindow& operator=(const MainWindow&);
 };
 
 #endif // MAIN_WINDOW_H

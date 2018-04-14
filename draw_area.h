@@ -53,6 +53,10 @@ private:
     /** state variables */
     bool drawing;
     bool drawingPoly;
+
+    /** Don't allow copying */
+    DrawArea(const DrawArea&);
+    DrawArea& operator=(const DrawArea&);
 };
 
 #endif // DRAW_AREA_H

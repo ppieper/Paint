@@ -27,6 +27,10 @@ public:
 private:
     QPixmap* image;
     QPoint startPoint;
+
+    /** Don't allow copying */
+    Tool(const Tool&);
+    Tool& operator=(const Tool&);
 };
 
 class PenTool : public Tool
@@ -41,6 +45,9 @@ public:
     virtual void drawTo(const QPoint&, DrawArea*);
 
 private:
+    /** Don't allow copying */
+    PenTool(const PenTool&);
+    PenTool& operator=(const PenTool&);
 };
 
 class LineTool : public Tool
@@ -54,6 +61,9 @@ public:
     virtual void drawTo(const QPoint&, DrawArea*);
 
 private:
+    /** Don't allow copying */
+    LineTool(const LineTool&);
+    LineTool& operator=(const LineTool&);
 };
 
 class EraserTool : public PenTool
@@ -68,6 +78,9 @@ public:
     virtual ToolType getType() const { return eraser; }
 
 private:
+    /** Don't allow copying */
+    EraserTool(const EraserTool&);
+    EraserTool& operator=(const EraserTool&);
 };
 
 class RectTool : public Tool
@@ -96,6 +109,10 @@ private:
     QColor fillColor;
     FillColor fillMode;
     int roundedCurve;
+
+    /** Don't allow copying */
+    RectTool(const RectTool&);
+    RectTool& operator=(const RectTool&);
 };
 
 #endif // TOOL_H
