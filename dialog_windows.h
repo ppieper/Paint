@@ -1,64 +1,36 @@
 #ifndef DIALOG_WINDOWS_H
 #define DIALOG_WINDOWS_H
 
-#include <QtWidgets>
+#include <QSpinBox>
+#include <QGroupBox>
+#include <QDialog>
+#include <QSlider>
+#include <QButtonGroup>
+
+#include "constants.h"
+#include "tool.h"
 
 
-const int DEFAULT_IMG_WIDTH = 640;
-const int DEFAULT_IMG_HEIGHT = 480;
-const int DEFAULT_PEN_THICKNESS = 1;
-const int DEFAULT_ERASER_THICKNESS = 10;
-
-enum LineStyle {solid, dashed, dotted, dash_dotted, dash_dot_dotted};
-enum CapStyle {flat, square, round_cap};
-enum DrawType {single, poly};
-enum ShapeType {rectangle, rounded_rectangle, ellipse};
-enum FillColor {foreground, background, no_fill};
-enum BoundaryType {miter_join, bevel_join, round_join};
-
-class MainWindow;
+class DrawArea;
 
 class CanvasSizeDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    CanvasSizeDialog(QWidget* parent = 0, const char* name = 0,
+    CanvasSizeDialog(QWidget* parent, const char* name = 0,
                      int width = DEFAULT_IMG_WIDTH,
                      int height = DEFAULT_IMG_HEIGHT);
 
-    int getWidthValue() const;
-    int getHeightValue() const;
+    int getWidthValue() const { return widthSpinBox->value(); }
+    int getHeightValue() const { return heightSpinBox->value(); }
 
 private:
-    void createSpinBoxes(int,int);
+    QGroupBox* createSpinBoxes(int,int);
 
     QSpinBox *widthSpinBox;
     QSpinBox *heightSpinBox;
     QGroupBox *spinBoxesGroup;
-};
-
-class LineDialog : public QDialog
-{
-    Q_OBJECT
-
-public:
-    LineDialog(QWidget* parent, LineStyle lineStyle = solid,
-                                CapStyle capStyle = round_cap,
-                                DrawType = single,
-                                int thickness = DEFAULT_PEN_THICKNESS);
-
-public slots:
-
-private:
-    MainWindow* mainWindow;
-    QButtonGroup* lineStyleG;
-    QButtonGroup* capStyleG;
-    QButtonGroup* drawTypeG;
-    QSlider* lineThicknessSlider;
-    QGroupBox* createLineStyle(LineStyle);
-    QGroupBox* createCapStyle(CapStyle);
-    QGroupBox* createDrawType(DrawType);
 };
 
 class PenDialog : public QDialog
@@ -66,15 +38,38 @@ class PenDialog : public QDialog
     Q_OBJECT
 
 public:
-    PenDialog(QWidget* parent, CapStyle = round_cap,
+    PenDialog(QWidget* parent, DrawArea* drawArea, CapStyle = round_cap,
               int size = DEFAULT_PEN_THICKNESS);
-public slots:
 
 private:
-    MainWindow* mainWindow;
+    QGroupBox* createCapStyle(CapStyle);
+
+    DrawArea* drawArea;
     QButtonGroup* capStyleG;
     QSlider* penSizeSlider;
+};
+
+class LineDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    LineDialog(QWidget* parent, DrawArea* drawArea,
+                                LineStyle lineStyle = solid,
+                                CapStyle capStyle = round_cap,
+                                DrawType = single,
+                                int thickness = DEFAULT_PEN_THICKNESS);
+
+private:
+    QGroupBox* createLineStyle(LineStyle);
     QGroupBox* createCapStyle(CapStyle);
+    QGroupBox* createDrawType(DrawType);
+
+    DrawArea* drawArea;
+    QButtonGroup* lineStyleG;
+    QButtonGroup* capStyleG;
+    QButtonGroup* drawTypeG;
+    QSlider* lineThicknessSlider;
 };
 
 class EraserDialog : public QDialog
@@ -82,13 +77,11 @@ class EraserDialog : public QDialog
     Q_OBJECT
 
 public:
-    EraserDialog(QWidget* parent,
+    EraserDialog(QWidget* parent, DrawArea* drawArea,
                  int thickness = DEFAULT_ERASER_THICKNESS);
 
-public slots:
-
 private:
-    MainWindow* mainWindow;
+    DrawArea* drawArea;
     QSlider* eraserThicknessSlider;
 };
 
@@ -97,25 +90,25 @@ class RectDialog : public QDialog
     Q_OBJECT
 
 public:
-    RectDialog(QWidget* parent, LineStyle = solid, ShapeType = rectangle,
+    RectDialog(QWidget* parent, DrawArea* drawArea,
+                                LineStyle = solid, ShapeType = rectangle,
                                 FillColor = no_fill, BoundaryType = miter_join,
                                 int thickness = DEFAULT_PEN_THICKNESS,
-                                int curve = DEFAULT_PEN_THICKNESS);
-
-public slots:
+                                int curve = DEFAULT_RECT_CURVE);
 
 private:
-    MainWindow* mainWindow;
+    QGroupBox* createBoundaryStyle(LineStyle);
+    QGroupBox* createShapeType(ShapeType);
+    QGroupBox* createFillColor(FillColor);
+    QGroupBox* createBoundaryType(BoundaryType);
+
+    DrawArea* drawArea;
     QButtonGroup* boundaryStyleG;
     QButtonGroup* shapeTypeG;
     QButtonGroup* fillColorG;
     QButtonGroup* boundaryTypeG;
     QSlider* lineThicknessSlider;
     QSlider* rRectCurveSlider;
-    QGroupBox* createBoundaryStyle(LineStyle);
-    QGroupBox* createShapeType(ShapeType);
-    QGroupBox* createFillColor(FillColor);
-    QGroupBox* createBoundaryType(BoundaryType);
 };
 
 #endif // DIALOGS_H

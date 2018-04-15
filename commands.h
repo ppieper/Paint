@@ -1,20 +1,21 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
-#include <qpixmap.h>
+#include <QPixmap>
 #include <QUndoCommand>
 
 
 class DrawCommand : public QUndoCommand
 {
 public:
-    DrawCommand(QPixmap old_image, QPixmap *image, QUndoCommand *parent = 0);
+    DrawCommand(const QPixmap &oldImage, QPixmap *image, QUndoCommand *parent = 0);
+
     void undo() override;
     void redo() override;
 private:
-    QPixmap* m_image;
-    QPixmap m_old_image;
-    QPixmap m_new_image;
+    QPixmap* image;
+    QPixmap oldImage;
+    QPixmap newImage;
 };
 
 #endif // COMMANDS_H
