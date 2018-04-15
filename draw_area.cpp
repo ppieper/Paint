@@ -371,7 +371,7 @@ void DrawArea::OnRectCurveConfig(int value)
  *                                   user-specified dimensions
  *
  */
-void DrawArea::createNewImage(QSize size)
+void DrawArea::createNewImage(const QSize &size)
 {
     // save a copy of the old image
     oldImage = image->copy();
@@ -389,7 +389,7 @@ void DrawArea::createNewImage(QSize size)
  * @brief DrawArea::loadImage - Load an image from a user-specified file
  *
  */
-void DrawArea::loadImage(QString fileName)
+void DrawArea::loadImage(const QString &fileName)
 {
     // save a copy of the old image
     oldImage = image->copy();
@@ -406,7 +406,7 @@ void DrawArea::loadImage(QString fileName)
  * @brief DrawArea::saveImage - Save an image to user-specified file
  *
  */
-void DrawArea::saveImage(QString fileName)
+void DrawArea::saveImage(const QString &fileName)
 {
     image->save(fileName, "BMP");
 }
@@ -415,7 +415,7 @@ void DrawArea::saveImage(QString fileName)
  * @brief DrawArea::resizeImage - Resize image to user-specified dimensions
  *
  */
-void DrawArea::resizeImage(QSize size)
+void DrawArea::resizeImage(const QSize &size)
 {
     // save a copy of the old image
     oldImage = image->copy();
@@ -457,7 +457,7 @@ void DrawArea::clearImage()
  *                                      as appropriate
  *
  */
-void DrawArea::updateColorConfig(QColor color, int which)
+void DrawArea::updateColorConfig(const QColor &color, int which)
 {
     if(which == foreground)
     {
@@ -525,7 +525,7 @@ void DrawArea::setLineMode(const DrawType mode)
  *                                  and save it on the undo/redo stack.
  *
  */
-void DrawArea::saveDrawCommand(QPixmap old_image)
+void DrawArea::saveDrawCommand(const QPixmap &old_image)
 {
     // put the old and new image on the stack for undo/redo
     QUndoCommand *drawCommand = new DrawCommand(old_image, image);

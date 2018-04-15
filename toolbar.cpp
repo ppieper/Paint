@@ -6,8 +6,8 @@
  * @brief ToolBar::ToolBar - Wrapper class for QToolBar.
  *                           construct a ToolBar with icons & actions.
  */
-ToolBar::ToolBar(QWidget *parent, QList<QAction*> imageActions,
-                                  QList<QAction*> toolActions)
+ToolBar::ToolBar(QWidget *parent, const QList<QAction*> &imageActions,
+                                  const QList<QAction*> &toolActions)
     : QToolBar(parent)
 {
     this->imageActions = imageActions;
