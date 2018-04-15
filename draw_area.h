@@ -25,15 +25,15 @@ public:
     void setLineMode(const DrawType mode);
 
     /** image edit functions */
-    void createNewImage(QSize);
-    void loadImage(QString);
-    void saveImage(QString);
-    void resizeImage(QSize);
+    void createNewImage(const QSize&);
+    void loadImage(const QString&);
+    void saveImage(const QString&);
+    void resizeImage(const QSize&);
     void clearImage();
-    void updateColorConfig(QColor color, int);
+    void updateColorConfig(const QColor&, int);
 
     /** save a command to the undo stack */
-    void saveDrawCommand(QPixmap);
+    void saveDrawCommand(const QPixmap&);
 
 public slots:
     /** toolbar actions */

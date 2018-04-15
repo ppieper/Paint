@@ -1,5 +1,6 @@
 # Paint
 
+- A simple bitmap painting program built with Qt.
 
 # Build Instructions:
 

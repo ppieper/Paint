@@ -387,11 +387,6 @@ void MainWindow::createMenuActions()
     tools->addAction(tr("Rectangle Properties..."),
                      this, SLOT(OnRectangleDialog()));
 
-    menuBar()->addMenu(file);
-    menuBar()->addMenu(edit);
-    menuBar()->addMenu(tools);
-    menuBar()->setNativeMenuBar(false);
-
     // store the actions in QLists for convenience
     imageActions.append(newAction);
     imageActions.append(openAction);
@@ -407,6 +402,12 @@ void MainWindow::createMenuActions()
     toolActions.append(lineAction);
     toolActions.append(eraserAction);
     toolActions.append(rectAction);
+
+    // populate the menubar with menu items
+    menuBar()->addMenu(file);
+    menuBar()->addMenu(edit);
+    menuBar()->addMenu(tools);
+    menuBar()->setNativeMenuBar(false);
 }
 
 /**

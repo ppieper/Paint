@@ -13,8 +13,8 @@ class QWidget;
 class ToolBar : public QToolBar
 {
 public:
-    ToolBar(QWidget* parent, QList<QAction*> imageActions,
-                             QList<QAction*> toolActions);
+    ToolBar(QWidget* parent, const QList<QAction*> &imageActions,
+                             const QList<QAction*> &toolActions);
 
 private:
     void createActions();

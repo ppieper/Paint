@@ -22,7 +22,7 @@ public:
     ~MainWindow();
 
     /** mouse event handler */
-    void virtual mousePressEvent (QMouseEvent *) override;
+    void virtual mousePressEvent (QMouseEvent*) override;
 
 public slots:
     /** toolbar actions */
