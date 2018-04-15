@@ -1,15 +1,12 @@
 #ifndef DRAW_AREA_H
 #define DRAW_AREA_H
 
+#include <QUndoStack>
+
+
 #include "constants.h"
 #include "tool.h"
 
-
-class QPixmap;
-class QWidget;
-class QPoint;
-class QRect;
-class QMouseEvent;
 
 class DrawArea : public QWidget
 {

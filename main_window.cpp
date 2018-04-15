@@ -1,6 +1,14 @@
 #include <iostream>
 using namespace std;
 
+#include <QDesktopWidget>
+#include <QMouseEvent>
+#include <QFileDialog>
+#include <QColorDialog>
+#include <QSignalMapper>
+#include <QMenuBar>
+#include <QMenu>
+
 #include "main_window.h"
 #include "commands.h"
 #include "draw_area.h"
@@ -20,12 +28,8 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     // get default tool
     currentTool = drawArea->getCurrentTool();
 
-    // create the toolbar
-    toolbar = new ToolBar(this, drawArea);
-    addToolBar(toolbar);
-
-    // create the menu (needs toolbar to be created first!)
-    createMenu();
+    // create the menu and toolbar
+    createMenuAndToolBar();
 
     // adjust window size, name, & stop context menu
     setWindowTitle(name);
@@ -36,6 +40,8 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
 
 MainWindow::~MainWindow()
 {
+    imageActions.clear();
+    toolActions.clear();
 }
 
 /**
@@ -254,62 +260,168 @@ void MainWindow::openToolDialog()
 }
 
 /**
- * @brief MainWindow::createMenu - create and return a menu
+ * @brief ToolBar::createMenuAndToolBar() - ensure that everything gets
+ *                                          created in the correct order
  *
  */
-void MainWindow::createMenu()
+void MainWindow::createMenuAndToolBar()
 {
+    // create actions and add them to the menu
+    createMenuActions();
+
+    // create the toolbar
+    toolbar = new ToolBar(this, imageActions, toolActions);
+    addToolBar(toolbar);
+
+    // add a toolbar toggle action to the menu
+    createToolBarToggle();
+}
+
+/**
+ * @brief MainWindow::createMenu - create the actions that appear in the menu
+ *
+ */
+void MainWindow::createMenuActions()
+{
+    // load button icons from files
+    QIcon newIcon(":/icons/newIcon");
+    QIcon openIcon(":/icons/openIcon");
+    QIcon saveIcon(":/icons/saveIcon");
+    QIcon undoIcon(":/icons/undoIcon");
+    QIcon redoIcon(":/icons/redoIcon");
+    QIcon clearIcon(":/icons/clearAllIcon");
+    QIcon resizeIcon(":/icons/resizeIcon");
+    QIcon fColorIcon(":/icons/fColorIcon");
+    QIcon bColorIcon(":/icons/bColorIcon");
+    QIcon penIcon(":/icons/penIcon");
+    QIcon lineIcon(":/icons/lineIcon");
+    QIcon eraserIcon(":/icons/eraserIcon");
+    QIcon rectIcon(":/icons/rectIcon");
+
     // File
-    QMenu* file = new QMenu(tr("&File"), this);
-    file->addAction("New image...", this, SLOT(OnNewImage()), tr("Ctrl+N"));
-    file->addAction("Load image...", this, SLOT(OnLoadImage()), tr("Ctrl+O"));
-    file->addAction("Save image...", this, SLOT(OnSaveImage()), tr("Ctrl+S"));
+    QMenu* file = new QMenu(tr("File"), this);
+    QAction* newAction = file->addAction(newIcon, tr("New image..."),
+                                this, SLOT(OnNewImage()), tr("Ctrl+N"));
+    QAction* openAction = file->addAction(openIcon, tr("Load image..."),
+                                 this, SLOT(OnLoadImage()), tr("Ctrl+O"));
+    QAction* saveAction = file->addAction(saveIcon, tr("Save image..."),
+                                 this, SLOT(OnSaveImage()), tr("Ctrl+S"));
     file->addAction("Quit", this, SLOT(close()), tr("Ctrl+Q"));
 
     // Edit
-    QMenu* edit = new QMenu(tr("&Edit"), this);
-    edit->addAction("Undo", drawArea, SLOT(OnUndo()), tr("Ctrl+Z"));
-    edit->addAction("Redo", drawArea, SLOT(OnRedo()), tr("Ctrl+Y"));
-    edit->addAction("Clear Canvas", drawArea, SLOT(OnClearAll()), tr("Ctrl+C"));
-    edit->addAction("Resize Image...", this, SLOT(OnResizeImage()), tr("Ctrl+R"));
+    QMenu* edit = new QMenu(tr("Edit"), this);
+    QAction* undoAction = edit->addAction(undoIcon, tr("Undo"),
+                                 drawArea, SLOT(OnUndo()), tr("Ctrl+Z"));
+    QAction* redoAction = edit->addAction(redoIcon, tr("Redo"),
+                                 drawArea, SLOT(OnRedo()), tr("Ctrl+Y"));
+    QAction* clearAction = edit->addAction(clearIcon, tr("Clear Canvas"),
+                                  drawArea, SLOT(OnClearAll()), tr("Ctrl+C"));
+    QAction* resizeAction = edit->addAction(resizeIcon, tr("Resize Image..."),
+                                   this, SLOT(OnResizeImage()), tr("Ctrl+R"));
 
-    // color pickers (still under Edit)
+    // color pickers (still under >Edit)
     QSignalMapper *signalMapper = new QSignalMapper(this);
 
-    QAction *fcolor_action = new QAction(tr("Foreground Color..."), this);
-    connect(fcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
-    fcolor_action->setShortcut(tr("Ctrl+F"));
+    QAction* fColorAction = new QAction(fColorIcon, tr("Foreground Color..."), this);
+    connect(fColorAction, SIGNAL(triggered()),
+            signalMapper, SLOT(map()));
+    fColorAction->setShortcut(tr("Ctrl+F"));
 
-    QAction *bcolor_action = new QAction(tr("Background Color..."), this);
-    connect(bcolor_action, SIGNAL(triggered()), signalMapper, SLOT(map()));
-    bcolor_action->setShortcut(tr("Ctrl+B"));
+    QAction* bColorAction = new QAction(bColorIcon, tr("Background Color..."), this);
+    connect(bColorAction, SIGNAL(triggered()),
+            signalMapper, SLOT(map()));
+    bColorAction->setShortcut(tr("Ctrl+B"));
 
-    signalMapper->setMapping(fcolor_action, foreground);
-    signalMapper->setMapping(bcolor_action, background);
+    signalMapper->setMapping(fColorAction, foreground);
+    signalMapper->setMapping(bColorAction, background);
 
-    connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(OnPickColor(int)));
+    connect(signalMapper, SIGNAL(mapped(int)),
+            this, SLOT(OnPickColor(int)));
 
-    edit->addAction(fcolor_action);
-    edit->addAction(bcolor_action);
+    edit->addAction(fColorAction);
+    edit->addAction(bColorAction);
 
-    // Tools
-    QMenu* tools = new QMenu(tr("&Tools"), this);
-    tools->addAction("Pen Properties...", this, SLOT(OnPenDialog()));
-    tools->addAction("Line Properties...", this, SLOT(OnLineDialog()));
-    tools->addAction("Eraser Properties...", this, SLOT(OnEraserDialog()));
-    tools->addAction("Rectangle Properties...", this, SLOT(OnRectangleDialog()));
+    // Tool pickers
 
+    QSignalMapper *signalMapperT = new QSignalMapper(this);
+
+    QAction* penAction = new QAction(penIcon, tr("Pen Tool"), this);
+    connect(penAction, SIGNAL(triggered()),
+            signalMapperT, SLOT(map()));
+    penAction->setShortcut(tr("W"));
+
+    QAction* lineAction = new QAction(lineIcon, tr("Line Tool"), this);
+    connect(lineAction, SIGNAL(triggered()),
+            signalMapperT, SLOT(map()));
+    lineAction->setShortcut(tr("F"));
+
+    QAction* eraserAction = new QAction(eraserIcon, tr("Eraser"), this);
+    connect(eraserAction, SIGNAL(triggered()),
+            signalMapperT, SLOT(map()));
+    eraserAction->setShortcut(tr("E"));
+
+    QAction* rectAction = new QAction(rectIcon, tr("Rectangle Tool"), this);
+    connect(rectAction, SIGNAL(triggered()),
+            signalMapperT, SLOT(map()));
+    rectAction->setShortcut(tr("R"));
+
+    signalMapperT->setMapping(penAction, pen);
+    signalMapperT->setMapping(lineAction, line);
+    signalMapperT->setMapping(eraserAction, eraser);
+    signalMapperT->setMapping(rectAction, rect_tool);
+
+    connect(signalMapperT, SIGNAL(mapped(int)), this, SLOT(OnChangeTool(int)));
+
+    // Tool dialogs
+    QMenu* tools = new QMenu(tr("Tools"), this);
+    tools->addAction(penAction);
+    tools->addAction(lineAction);
+    tools->addAction(eraserAction);
+    tools->addAction(rectAction);
+    tools->addAction(tr("Pen Properties..."),
+                     this, SLOT(OnPenDialog()));
+    tools->addAction(tr("Line Properties..."),
+                     this, SLOT(OnLineDialog()));
+    tools->addAction(tr("Eraser Properties..."),
+                     this, SLOT(OnEraserDialog()));
+    tools->addAction(tr("Rectangle Properties..."),
+                     this, SLOT(OnRectangleDialog()));
+
+    menuBar()->addMenu(file);
+    menuBar()->addMenu(edit);
+    menuBar()->addMenu(tools);
+    menuBar()->setNativeMenuBar(false);
+
+    // store the actions in QLists for convenience
+    imageActions.append(newAction);
+    imageActions.append(openAction);
+    imageActions.append(saveAction);
+    imageActions.append(undoAction);
+    imageActions.append(redoAction);
+    imageActions.append(clearAction);
+    imageActions.append(resizeAction);
+    imageActions.append(fColorAction);
+    imageActions.append(bColorAction);
+
+    toolActions.append(penAction);
+    toolActions.append(lineAction);
+    toolActions.append(eraserAction);
+    toolActions.append(rectAction);
+}
+
+/**
+ * @brief ToolBar::createBarToggle - Create the toggle toolbar action and add
+ *                                     it to the menu under "View"
+ *
+ */
+void MainWindow::createToolBarToggle()
+{
     // View
-    QMenu* view = new QMenu(tr("&View"), this);
+    QMenu* view = new QMenu(tr("View"), this);
     QAction *toggleToolbar = toolbar->toggleViewAction();
     toggleToolbar->setText(tr("Show &Toolbar"));
     toggleToolbar->setShortcut(tr("Ctrl+T"));
 
     view->addAction(toggleToolbar);
-
-    menuBar()->addMenu(file);
-    menuBar()->addMenu(edit);
-    menuBar()->addMenu(tools);
     menuBar()->addMenu(view);
-    menuBar()->setNativeMenuBar(false);
 }

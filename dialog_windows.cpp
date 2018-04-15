@@ -1,3 +1,10 @@
+#include <QPushButton>
+#include <QRadioButton>
+#include <QFormLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+
 #include "dialog_windows.h"
 #include "main_window.h"
 #include "draw_area.h"

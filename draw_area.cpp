@@ -1,4 +1,5 @@
-#include <QtWidgets>
+#include <QPainter>
+#include <QPaintEvent>
 
 #include "commands.h"
 #include "draw_area.h"
@@ -18,8 +19,10 @@ DrawArea::DrawArea(QWidget *parent)
     undoStack = new QUndoStack(this);
     undoStack->setUndoLimit(UNDO_LIMIT);
 
-    // initialize image and tools
+    // initialize image
     image = new QPixmap();
+
+    //create the pen, line, eraser, & rect tools
     createTools();
 
     // initialize colors
@@ -109,7 +112,7 @@ void DrawArea::mouseMoveEvent(QMouseEvent *e)
                 drawingPoly = true;
             }
         }
-        currentTool->drawTo(e->pos(), this);
+        currentTool->drawTo(e->pos(), this, image);
     }
 }
 
@@ -132,7 +135,7 @@ void DrawArea::mouseReleaseEvent(QMouseEvent *e)
             //return;
         }
         if(currentTool->getType() == pen)
-            currentTool->drawTo(e->pos(), this);
+            currentTool->drawTo(e->pos(), this, image);
 
         // for undo/redo - make sure there was a change
         // (in case drawing began off-image)
@@ -536,14 +539,10 @@ void DrawArea::saveDrawCommand(QPixmap old_image)
 void DrawArea::createTools()
 {
     // create the tools
-    penTool = new PenTool(QBrush(Qt::black),1,Qt::SolidLine,
-                          Qt::RoundCap,image);
-    lineTool = new LineTool(QBrush(Qt::black),1,Qt::SolidLine,
-                            Qt::RoundCap,image);
-    eraserTool = new EraserTool(QBrush(Qt::white),10,Qt::SolidLine,
-                                Qt::RoundCap,image);
-    rectTool = new RectTool(QBrush(Qt::black),1,Qt::SolidLine,Qt::
-                            RoundCap,image);
+    penTool = new PenTool(QBrush(Qt::black), DEFAULT_PEN_THICKNESS);
+    lineTool = new LineTool(QBrush(Qt::black), DEFAULT_PEN_THICKNESS);
+    eraserTool = new EraserTool(QBrush(Qt::white), DEFAULT_ERASER_THICKNESS);
+    rectTool = new RectTool(QBrush(Qt::black), DEFAULT_PEN_THICKNESS);
 
     // set default tool
     currentTool = static_cast<Tool*>(penTool);
@@ -553,7 +552,7 @@ void DrawArea::createTools()
  * @brief imagesEqual - returns true if the two images are the same
  *
  */
-bool imagesEqual(const QPixmap& image1, const QPixmap& image2)
+bool imagesEqual(const QPixmap &image1, const QPixmap &image2)
 {
     return image1.toImage() == image2.toImage();
 }

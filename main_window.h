@@ -1,9 +1,17 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+#include <QMainWindow>
+#include <QList>
+#include <QAction>
+#include <QWidget>
+
 #include "dialog_windows.h"
+#include "draw_area.h"
 #include "toolbar.h"
 
+
+class Tool;
 
 class MainWindow: public QMainWindow
 {
@@ -31,15 +39,21 @@ public slots:
     void OnRectangleDialog();
 
 private:
-    void createMenu();
+    void createMenuActions();
+    void createToolBarToggle();
+    void createMenuAndToolBar();
 
     /** tool dialog dispatcher */
     void openToolDialog();
 
-    /** the paintArea */
+    /** the drawArea */
     DrawArea* drawArea;
 
-    /** Main toolbar */
+    /** actions */
+    QList<QAction*> imageActions;
+    QList<QAction*> toolActions;
+
+    /** main toolbar */
     ToolBar* toolbar;
 
     /** current tool */

@@ -1,13 +1,16 @@
 #ifndef DIALOG_WINDOWS_H
 #define DIALOG_WINDOWS_H
 
-#include <QtWidgets>
+#include <QSpinBox>
+#include <QGroupBox>
+#include <QDialog>
+#include <QSlider>
+#include <QButtonGroup>
 
 #include "constants.h"
 #include "tool.h"
 
 
-class MainWindow;
 class DrawArea;
 
 class CanvasSizeDialog : public QDialog
@@ -99,7 +102,6 @@ private:
     QGroupBox* createFillColor(FillColor);
     QGroupBox* createBoundaryType(BoundaryType);
 
-    MainWindow* mainWindow;
     DrawArea* drawArea;
     QButtonGroup* boundaryStyleG;
     QButtonGroup* shapeTypeG;

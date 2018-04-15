@@ -1,7 +1,8 @@
 #ifndef TOOL_H
 #define TOOL_H
 
-#include <QtWidgets>
+#include <QWidget>
+#include <QPen>
 
 #include "constants.h"
 
@@ -12,20 +13,18 @@ class Tool : public QPen
 {
 public:
     Tool(const QBrush &brush, qreal width, Qt::PenStyle s = Qt::SolidLine,
-         Qt::PenCapStyle c = Qt::RoundCap, QPixmap *i = 0,
+         Qt::PenCapStyle c = Qt::RoundCap,
          Qt::PenJoinStyle j = Qt::BevelJoin)
-        : QPen(brush, width, s, c, j) { image = i; }
+        : QPen(brush, width, s, c, j) {}
     virtual ~Tool() {}
 
     virtual ToolType getType() const = 0;
-    virtual void drawTo(const QPoint&, DrawArea*) {}
+    virtual void drawTo(const QPoint&, DrawArea*, QPixmap*) {}
 
-    QPixmap* getImage() const { return image; }
     QPoint getStartPoint() const { return startPoint; }
     void setStartPoint(QPoint point) { startPoint = point; }
 
 private:
-    QPixmap* image;
     QPoint startPoint;
 
     /** Don't allow copying */
@@ -37,12 +36,12 @@ class PenTool : public Tool
 {
 public:
     PenTool(const QBrush &brush, qreal width, Qt::PenStyle s = Qt::SolidLine,
-            Qt::PenCapStyle c = Qt::RoundCap, QPixmap *i = 0,
+            Qt::PenCapStyle c = Qt::RoundCap,
             Qt::PenJoinStyle j = Qt::BevelJoin)
-       : Tool(brush, width, s, c, i, j) {}
+       : Tool(brush, width, s, c, j) {}
 
     virtual ToolType getType() const { return pen; }
-    virtual void drawTo(const QPoint&, DrawArea*);
+    virtual void drawTo(const QPoint&, DrawArea*, QPixmap*);
 
 private:
     /** Don't allow copying */
@@ -54,11 +53,11 @@ class LineTool : public Tool
 {
 public:
     LineTool(const QBrush &brush, qreal width, Qt::PenStyle s = Qt::SolidLine,
-             Qt::PenCapStyle c = Qt::RoundCap, QPixmap *i = 0,
+             Qt::PenCapStyle c = Qt::RoundCap,
              Qt::PenJoinStyle j = Qt::BevelJoin)
-       : Tool(brush, width, s, c, i, j) {}
+       : Tool(brush, width, s, c, j) {}
     virtual ToolType getType() const { return line; }
-    virtual void drawTo(const QPoint&, DrawArea*);
+    virtual void drawTo(const QPoint&, DrawArea*, QPixmap*);
 
 private:
     /** Don't allow copying */
@@ -71,9 +70,9 @@ class EraserTool : public PenTool
 public:
     EraserTool(const QBrush &brush, qreal width,
                Qt::PenStyle s = Qt::SolidLine,
-               Qt::PenCapStyle c = Qt::RoundCap, QPixmap *i = 0,
+               Qt::PenCapStyle c = Qt::RoundCap,
                Qt::PenJoinStyle j = Qt::BevelJoin)
-       : PenTool(brush, width, s, c, i, j) {}
+       : PenTool(brush, width, s, c, j) {}
 
     virtual ToolType getType() const { return eraser; }
 
@@ -87,7 +86,7 @@ class RectTool : public Tool
 {
 public:
     RectTool(const QBrush &brush, qreal width, Qt::PenStyle s = Qt::SolidLine,
-             Qt::PenCapStyle c = Qt::RoundCap, QPixmap *i = 0,
+             Qt::PenCapStyle c = Qt::RoundCap,
              Qt::PenJoinStyle j = Qt::BevelJoin,
              QColor fill = QColor(Qt::transparent),
              ShapeType shape = rectangle,
@@ -95,7 +94,7 @@ public:
              int roundedCurve = DEFAULT_RECT_CURVE);
 
     virtual ToolType getType() const { return rect_tool; }
-    virtual void drawTo(const QPoint&, DrawArea*);
+    virtual void drawTo(const QPoint&, DrawArea*, QPixmap*);
 
     FillColor getFillMode() const { return fillMode; }
     void setFillMode(FillColor mode) { fillMode = mode; }

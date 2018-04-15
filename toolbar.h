@@ -1,20 +1,26 @@
 #ifndef TOOLBAR_H
 #define TOOLBAR_H
 
+#include <QToolBar>
+#include <QAction>
+#include <QList>
+
 #include "constants.h"
 
 
-class DrawArea;
+class QWidget;
 
 class ToolBar : public QToolBar
 {
 public:
-    ToolBar(QWidget* parent, DrawArea* drawArea);
+    ToolBar(QWidget* parent, QList<QAction*> imageActions,
+                             QList<QAction*> toolActions);
 
 private:
     void createActions();
 
-    DrawArea* drawArea;
+    QList<QAction*> imageActions;
+    QList<QAction*> toolActions;
 
     /** Don't allow copying */
     ToolBar(const ToolBar&);

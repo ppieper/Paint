@@ -1,3 +1,5 @@
+#include <QPainter>
+
 #include "tool.h"
 #include "draw_area.h"
 
@@ -6,16 +8,16 @@
  * @brief PenTool::drawTo - Draws line from startPoint to endPoint, where
  *                          startpoint is either:
  *
- *                          -where mousewas clicked (the initial left click)
+ *                          -where mouse was clicked (the initial left click)
  *                          -where mouse was moved FROM (last event's endPoint)
  *
  *                          -endPoint is where the mouse was moved TO on this event.
  *
  */
-void PenTool::drawTo(const QPoint &endPoint, DrawArea* drawArea)
+void PenTool::drawTo(const QPoint &endPoint, DrawArea *drawArea, QPixmap *image)
 {
-    QPainter painter(getImage());
-    painter.setPen((QPen)*this);
+    QPainter painter(image);
+    painter.setPen(static_cast<QPen>(*this));
     painter.drawLine(getStartPoint(), endPoint);
 
     // speed things up a bit by only updating the immediate
@@ -29,13 +31,13 @@ void PenTool::drawTo(const QPoint &endPoint, DrawArea* drawArea)
 /**
  * @brief LineTool::drawTo - Draws line from startPoint to endPoint, where:
  *                           -startpoint is where mouse was clicked, and
- *                           -endPoint is where the mouse was released.
+ *                           -endPoint is where the mouse was released
  *
  */
-void LineTool::drawTo(const QPoint &endPoint, DrawArea* drawArea)
+void LineTool::drawTo(const QPoint &endPoint,  DrawArea *drawArea, QPixmap *image)
 {
-    QPainter painter(getImage());
-    painter.setPen((QPen)*this);
+    QPainter painter(image);
+    painter.setPen(static_cast<QPen>(*this));
     painter.drawLine(getStartPoint(), endPoint);
     drawArea->update();
 }
@@ -45,10 +47,9 @@ void LineTool::drawTo(const QPoint &endPoint, DrawArea* drawArea)
  *
  */
 RectTool::RectTool(const QBrush &brush, qreal width, Qt::PenStyle s,
-                   Qt::PenCapStyle c, QPixmap *i, Qt::PenJoinStyle j,
-                   QColor fill, ShapeType shape, FillColor mode,
-                   int curve)
-    : Tool(brush, width, s, c, i, j)
+                   Qt::PenCapStyle c, Qt::PenJoinStyle j, QColor fill,
+                   ShapeType shape, FillColor mode, int curve)
+    : Tool(brush, width, s, c, j)
 {
     fillColor = fill;
     fillMode = mode;
@@ -59,13 +60,13 @@ RectTool::RectTool(const QBrush &brush, qreal width, Qt::PenStyle s,
 /**
  * @brief RectTool::drawTo - Draws shape from startPoint to endPoint, where:
  *                           -startpoint is where mouse was clicked, and
- *                           -endPoint is where the mouse was released.
+ *                           -endPoint is where the mouse was released
  *
  */
-void RectTool::drawTo(const QPoint &endPoint, DrawArea* drawArea)
+void RectTool::drawTo(const QPoint &endPoint,  DrawArea *drawArea, QPixmap *image)
 {
-    QPainter painter(getImage());
-    painter.setPen((QPen)*this);
+    QPainter painter(image);
+    painter.setPen(static_cast<QPen>(*this));
     QRect rect = adjustPoints(endPoint);
 
     //draw a rectangle, square, or ellipse--fill or no fill--based on settings
@@ -97,9 +98,8 @@ void RectTool::drawTo(const QPoint &endPoint, DrawArea* drawArea)
 }
 
 /**
- * @brief RectTool::adjustPoints - switches the startPoint and endPoint
- *                                 (top left becomes bottom right, vice
- *                                  versa)
+ * @brief RectTool::adjustPoints - adjusts the points when constructing
+ *                                 a rectangle
  *
  */
 QRect RectTool::adjustPoints(const QPoint &endPoint)
