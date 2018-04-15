@@ -17,9 +17,9 @@ const int MAX_RECT_CURVE = 100;
 
 /** spinbox ranges */
 const int MIN_IMG_WIDTH = 1;
-const int MAX_IMG_WIDTH = 9999; // probably too high for a QPixmap
+const int MAX_IMG_WIDTH = 2560; // 2560x1440 limit due to undo/redo limitations
 const int MIN_IMG_HEIGHT = 1;
-const int MAX_IMG_HEIGHT = 9999;
+const int MAX_IMG_HEIGHT = 1440;
 
 /** max number of undo commands */
 const int UNDO_LIMIT = 100;

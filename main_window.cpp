@@ -31,6 +31,12 @@ MainWindow::MainWindow(QWidget* parent, const char* name)
     // create the menu and toolbar
     createMenuAndToolBar();
 
+    // init dialog pointers to 0
+    penDialog = 0;
+    lineDialog = 0;
+    eraserDialog = 0;
+    rectDialog = 0;
+
     // adjust window size, name, & stop context menu
     setWindowTitle(name);
     resize(QDesktopWidget().availableGeometry(this).size()*.6);

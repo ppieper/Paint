@@ -59,11 +59,11 @@ private:
     /** current tool */
     Tool* currentTool;
 
-    /** dialog pointers - init to 0 */
-    PenDialog* penDialog = 0;
-    LineDialog* lineDialog = 0;
-    EraserDialog* eraserDialog = 0;
-    RectDialog* rectDialog = 0;
+    /** dialog pointers */
+    PenDialog* penDialog;
+    LineDialog* lineDialog;
+    EraserDialog* eraserDialog;
+    RectDialog* rectDialog;
 
     /** Don't allow copying */
     MainWindow(const MainWindow&);
